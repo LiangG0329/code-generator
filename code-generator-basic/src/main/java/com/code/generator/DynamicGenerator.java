@@ -6,10 +6,10 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author
@@ -41,6 +41,7 @@ public class DynamicGenerator {
 
         // 指定模板文件所在的路径
         File templateDir = new File(inputPath).getParentFile();
+        System.out.println("templateDir = " + templateDir);
         configuration.setDirectoryForTemplateLoading(templateDir);
 
         // 设置模板文件使用的字符集,数字格式
@@ -49,7 +50,9 @@ public class DynamicGenerator {
 
         // 创建模板对象，加载指定模板
         String templateName = new File(inputPath).getName();
-        Template template = configuration.getTemplate(templateName);
+        // 指定字符集,解决中文乱码问题
+        Template template = configuration.getTemplate(templateName,"utf-8");
+
 
         // 数据模型(对象/HashMap)，填充模板
         // MainTemplateConfig mainTemplateConfig = (MainTemplateConfig) model;
@@ -60,7 +63,7 @@ public class DynamicGenerator {
         }
 
         // 指定生成的文件路径和名称
-        Writer out = new FileWriter(outputPath);
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(Paths.get(outputPath)), StandardCharsets.UTF_8));
 
         // 调用template的process,处理并生成文件
         template.process(model, out);

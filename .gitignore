@@ -1,7 +1,3 @@
-### Custom Template
-.idea
-code-gengrator.iml
-*.iml
 
 ### Java template
 # Compiled class file
@@ -127,3 +123,9 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
+### Custom template
+.idea
+code-gengrator.iml
+*.iml
+/code-generator-basic/src/main/java/com/code/cli/example/
+/code-generator-basic/src/main/java/com/code/cli/pattern/
