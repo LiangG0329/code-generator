@@ -1,33 +1,25 @@
-package com.code.generator;
+package ${basePackage}.generator;
 
 import cn.hutool.core.io.FileUtil;
-import com.code.model.MainTemplateConfig;
+import ${basePackage}.model.DataModel;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * @author Liang
+ * 动态文件生成
+ * @author @{author}
  * @create 2024/2/13
  */
-public class DynamicGenerator {
-    /** 测试动态生成 */
-    public static void main(String[] args) throws IOException, TemplateException {
-        // 指定模板文件所在的路径
-        String projectPath = System.getProperty("user.dir") + File.separator + "code-generator-basic";
-        String inputPath = projectPath + File.separator + "src/main/resources/templates/MainTemplate.java.ftl";
-        String outputPath = projectPath + File.separator + "output/MainTemplate.java";
-        MainTemplateConfig mainTemplateConfig = new MainTemplateConfig();
-        mainTemplateConfig.setAuthor("liang");
-        mainTemplateConfig.setOutputText("out:");
-        doGenerate(inputPath, outputPath, mainTemplateConfig);
-    }
-
+public class DynamicFileGenerator {
     /**
      * 生成文件
      * @param inputPath  模板文件输入路径
@@ -53,9 +45,6 @@ public class DynamicGenerator {
         String templateName = new File(inputPath).getName();
         // 指定字符集,解决中文乱码问题
         Template template = configuration.getTemplate(templateName,"utf-8");
-
-        // 数据模型(对象/HashMap)，填充模板
-        // MainTemplateConfig mainTemplateConfig = (MainTemplateConfig) model;
 
         // 文件不存在则创建文件和父目录
         if (!FileUtil.exist(outputPath)) {

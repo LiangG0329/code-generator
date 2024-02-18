@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * 动静结合，生成ACM(求和代码)
+ * 核心生成器，生成ACM(求和模板代码)
  * @author Liang
  * @create 2024/2/13
  */
@@ -31,7 +31,7 @@ public class MainGenerator {
         System.out.println("dynamicInputPath = " + dynamicInputPath);
         String dynamicOutputPath = projectPath + File.separator + "output/MainTemplate.java";
         System.out.println("dynamicOutputPath = " + dynamicOutputPath);
-        DynamicGenerator.doGenerator(dynamicInputPath, dynamicOutputPath, model);
+        DynamicGenerator.doGenerate(dynamicInputPath, dynamicOutputPath, model);
     }
 
     public static void main(String[] args) throws TemplateException, IOException {
