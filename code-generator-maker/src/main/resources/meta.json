@@ -6,8 +6,9 @@
   "author": "Liang",
   "createTime": "2024-2-17",
   "fileConfig": {
-    "inputRootPath": "E:/projects/code-generator/code-generator-demo-projects/acm-template-pro",
+    "inputRootPath": ".source/acm-template-pro",
     "outputRootPath": "generated",
+    "sourceRootPath": "E:/projects/code-generator/code-generator-demo-projects/acm-template-pro",
     "type": "dir",
     "files": [
       {

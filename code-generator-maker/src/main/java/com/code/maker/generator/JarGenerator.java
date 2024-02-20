@@ -37,7 +37,7 @@ public class JarGenerator {
 
         // 等待命令执行完成
         int exitCode = process.waitFor();
-        System.out.println("命令执行结束，退出码：" + exitCode);
+        System.out.println("maven package 命令执行结束，退出码：" + exitCode);
     }
 
     /** 测试 */

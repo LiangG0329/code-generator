@@ -29,6 +29,11 @@ public class MainGenerator {
             FileUtil.mkdir(outputPath);
         }
 
+        // 复制原始文件到生成代码包，后续使用相对路径生成代码，提高可移植性
+        String sourceRootPath = meta.getFileConfig().getSourceRootPath();
+        String sourceCopyPath = outputPath + File.separator + ".source";
+        FileUtil.copy(sourceRootPath, sourceCopyPath, true);
+
         // 读取 resources 目录
         ClassPathResource classPathResource = new ClassPathResource("");
         String inputResourcePath = classPathResource.getAbsolutePath();
@@ -91,6 +96,11 @@ public class MainGenerator {
         outputFilePath = outputPath + File.separator + "pom.xml";
         DynamicFileGenerator.doGenerate(inputFilePath , outputFilePath, meta);
 
+        // README.md 项目介绍文档
+        inputFilePath = inputResourcePath + File.separator + "templates/README.md.ftl";
+        outputFilePath = outputPath + File.separator + "README.md";
+        DynamicFileGenerator.doGenerate(inputFilePath , outputFilePath, meta);
+
         // 构建 jar 包
         JarGenerator.doGenerate(outputPath);
 
@@ -99,5 +109,28 @@ public class MainGenerator {
         String jarName = String.format("%s-%s-jar-with-dependencies.jar", meta.getName(), meta.getVersion());
         String jarPath = "target/" + jarName;
         ScriptGenerator.doGenerate(shellOutputPath, jarPath);
+
+        // 生成精简版代码生成器(产物包)
+        String distOutputPath = outputPath + "-dist";
+        // - 拷贝jar包
+        String targetAbsolutePath = distOutputPath + File.separator + "target";
+        FileUtil.mkdir(targetAbsolutePath);
+        String jarAbsolutePath = outputPath + File.separator + jarPath;
+        FileUtil.copy(jarAbsolutePath, targetAbsolutePath, true);
+        // - 拷贝脚本文件
+        FileUtil.copy(shellOutputPath, distOutputPath, true);
+        FileUtil.copy(shellOutputPath + ".bat", distOutputPath, true);
+        // - 拷贝源模板文件
+        FileUtil.copy(sourceCopyPath, distOutputPath, true);
+
+        // git init 根据需要可开启支持使用 Git 版本控制工具来托管
+        // 完整版代码托管
+//        GitInit.doInit(outputPath);
+//        // 复制gitignore文件
+//        String gitIgnorePath = projectPath + File.separator + ".gitignore";
+//        FileUtil.copy(gitIgnorePath, outputPath, false);
+//        // 精简版代码托管
+//        GitInit.doInit(distOutputPath);
+//        FileUtil.copy(gitIgnorePath, distOutputPath, false);
     }
 }
