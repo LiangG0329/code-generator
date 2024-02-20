@@ -25,6 +25,7 @@ public class Meta {
     @NoArgsConstructor
     @Data
     public static class FileConfigDTO {
+        private String sourceRootPath;
         private String inputRootPath;
         private String outputRootPath;
         private String type;
