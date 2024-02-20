@@ -12,6 +12,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import com.code.maker.meta.Meta.FileConfigDTO;
 import com.code.maker.meta.Meta.ModelConfigDTO;
+import com.code.maker.meta.enums.FileGenerateTypeEnum;
+import com.code.maker.meta.enums.FileTypeEnum;
+import com.code.maker.meta.enums.ModelTypeEnum;
 
 
 /**
@@ -38,7 +41,7 @@ public class MetaValidator {
         // 校验配置文件信息，没有则设置默认值
         String name = StrUtil.blankToDefault(meta.getName(), "code-generator");
         String description = StrUtil.emptyToDefault(meta.getDescription(), "代码生成器");
-        String author = StrUtil.emptyToDefault(meta.getAuthor(), "Liang");
+        String author = StrUtil.emptyToDefault(meta.getAuthor(), "author");
         String basePackage = StrUtil.blankToDefault(meta.getBasePackage(), "com.code");
         String version = StrUtil.emptyToDefault(meta.getVersion(), "1.0");
         String createTime = StrUtil.emptyToDefault(meta.getCreateTime(), DateUtil.now());
@@ -81,7 +84,7 @@ public class MetaValidator {
         }
 
         String fileConfigType = fileConfig.getType();
-        String defaultType = "dir";
+        String defaultType = FileTypeEnum.DIR.getValue();
         if (StrUtil.isEmpty(fileConfigType)) {
             fileConfig.setType(defaultType);
         }
@@ -107,9 +110,9 @@ public class MetaValidator {
             if (StrUtil.isBlank(fileType)) {
                 // 无文件后缀
                 if (StrUtil.isBlank(FileUtil.getSuffix(inputPath))) {
-                    file.setType("dir");
+                    file.setType(FileTypeEnum.DIR.getValue());
                 } else {
-                    file.setType("file");
+                    file.setType(FileTypeEnum.FILE.getValue());
                 }
             }
             // generateType: 如果文件结尾不为 .ftl, generateType 默认为 static, 否则为 dynamic
@@ -117,9 +120,9 @@ public class MetaValidator {
             if (StrUtil.isBlank(generateType)) {
                 // .ftl文件 动态模板
                 if (inputPath.endsWith(".ftl")) {
-                    file.setGenerateType("dynamic");
+                    file.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
                 } else {
-                    file.setGenerateType("static");
+                    file.setGenerateType(FileGenerateTypeEnum.STATIC.getValue());
                 }
             }
         }
@@ -147,7 +150,8 @@ public class MetaValidator {
 
             String modelInfoType = model.getType();
             if (StrUtil.isEmpty(modelInfoType)) {
-                model.setType("String");
+                // 默认类型为String
+                model.setType(ModelTypeEnum.STRING.getValue());
             }
         }
     }
