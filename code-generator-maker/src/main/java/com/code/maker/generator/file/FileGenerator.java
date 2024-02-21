@@ -18,7 +18,8 @@ public class FileGenerator {
      * @throws TemplateException
      * @throws IOException
      */
-    public static void doGenerate(Object model) throws TemplateException, IOException {
+    public static void doGenerate(DataModel model) throws TemplateException, IOException {
+
         String inputRootPath = "E:\\pojects\\code-gengrator\\code-generator-demo-projects\\acm-template-pro";
         String outputRootPath = "E:\\pojects\\code-gengrator\\acm-template-pro";
 
@@ -32,7 +33,10 @@ public class FileGenerator {
         DynamicFileGenerator.doGenerate(inputPath, outputPath, model);
 
         // 2.静态文件生成
-
+        Boolean loop = model.getLoop();
+        String author = model.getMainTemplate().getAuthor();
+        String outputText = model.getMainTemplate().getOutputText();
+        Boolean neeGitIgnore = model.getNeeGit();
         inputPath = new File(inputRootPath, ".gitignore").getAbsolutePath();
         outputPath = new File(outputRootPath, ".gitignore").getAbsolutePath();
         StaticFileGenerator.copyFilesByHutool(inputPath, outputPath);
@@ -45,9 +49,9 @@ public class FileGenerator {
     /** 测试 */
     public static void main(String[] args) throws TemplateException, IOException {
         DataModel mainTemplateConfig = new DataModel();
-        mainTemplateConfig.setAuthor("hello world:");
+//        mainTemplateConfig.setAuthor("hello world:");
         mainTemplateConfig.setLoop(false);
-        mainTemplateConfig.setOutputText("out:");
+//        mainTemplateConfig.setOutputText("out:");
         doGenerate(mainTemplateConfig);
     }
 }

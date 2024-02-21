@@ -121,7 +121,7 @@ public abstract class GenerateTemplate {
         outputFilePath = outputBaseJavaPackagePath + "/generator/DynamicFileGenerator.java";
         DynamicFileGenerator.doGenerate(inputFilePath , outputFilePath, meta);
 
-        // generator.MainGenerator
+        // generator.FileGenerator
         inputFilePath = inputResourcePath + File.separator + "templates/java/generator/FileGenerator.java.ftl";
         outputFilePath = outputBaseJavaPackagePath + "/generator/FileGenerator.java";
         DynamicFileGenerator.doGenerate(inputFilePath , outputFilePath, meta);

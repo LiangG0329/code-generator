@@ -8,30 +8,83 @@ import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
+<#-- 宏定义: 生成选项 -->
+<#macro generateOption indent modelInfo>
+
+${indent}/** 命令选项: ${modelInfo.description} */
+${indent}@CommandLine.Option(names = {<#if modelInfo.abbr??>"-${modelInfo.abbr}", </#if>"--${modelInfo.fieldName}"}, arity = "0..1", <#if modelInfo.description??>description = "${modelInfo.description}",</#if> interactive = true, echo = true)
+${indent}private ${modelInfo.type} ${modelInfo.fieldName}<#if modelInfo.defaultValue??> = ${modelInfo.defaultValue?c}</#if>;
+</#macro>
+
+<#-- 宏定义: 生成命令调用 -->
+<#macro generateCommand indent modelInfo>
+
+${indent}System.out.println("输入${modelInfo.groupName}配置：");
+${indent}CommandLine commandLine = new CommandLine(${modelInfo.type}Command.class);
+${indent}commandLine.execute(${modelInfo.allArgsStr});
+</#macro>
+
 /**
- * generate辅助命令,生成ACM求和模版代码
- * @author Liang
- * @create 2024/2/15
+ * generate 生成命令类和命令选项
+ * @author ${author}
+ * @create ${createTime}
  */
 @Data
 @CommandLine.Command(name = "generate", description = "代码生成", mixinStandardHelpOptions = true)
 public class GenerateCommand implements Callable<Integer> {
-    /** 子命令1: 是否开启循环 */
-    @CommandLine.Option(names = {"-l", "--loop"}, arity = "0..1", description = "是否循环,输入true/false", interactive = true, echo = true)
-    private boolean loop;
+<#list modelConfig.models as modelInfo>
+    <#-- group model 分组命令 -->
+    <#if modelInfo.groupKey??>
 
-    /** 子命令2: 作者注释 */
-    @CommandLine.Option(names = {"-a", "--author"}, arity = "0..1", description = "作者名称", interactive = true, echo = true)
-    private String author = "admin";
+    /**
+     * ${modelInfo.groupName}
+     */
+    static DataModel.${modelInfo.type} ${modelInfo.groupKey} = new DataModel.${modelInfo.type}();
 
-    /** 子命令3: 输出文本提示 */
-    @CommandLine.Option(names = {"-o", "--outputText"}, arity = "0..1", description = "输出文本", interactive = true, echo = true)
-    private String outputText = "sum = ";
+    <#-- 根据分组生成命令类 -->
+    /** 分组命令 ${modelInfo.groupKey} */
+    @CommandLine.Command(name = "${modelInfo.groupKey}")
+    @Data
+    public static class ${modelInfo.type}Command implements Runnable {
+    <#list modelInfo.models as subModel>
+        <@generateOption indent="        " modelInfo=subModel />
+    </#list>
 
+        /** 将参数传递给外层对象 */
+        @Override
+        public void run() {
+        <#list modelInfo.models as subModelInfo>
+            ${modelInfo.groupKey}.set${subModelInfo.fieldName? cap_first}(${subModelInfo.fieldName});
+        </#list>
+        }
+    }
+    <#else>
+    <@generateOption indent="    " modelInfo=modelInfo />
+    </#if>
+</#list>
+
+    <#-- 生成调用方法 -->
     @Override
     public Integer call() throws Exception {
+        <#list modelConfig.models as modelInfo>
+        <#if modelInfo.groupKey??>
+        <#if modelInfo.condition??>
+        if (${modelInfo.condition}) {
+            <@generateCommand indent="            " modelInfo=modelInfo />
+        }
+        <#else>
+        <@generateCommand indent="      " modelInfo=modelInfo />
+        </#if>
+        </#if>
+        </#list>
+        <#-- 填充数据模型对象 -->
         DataModel dataModel = new DataModel();  // 数据模型
         BeanUtil.copyProperties(this, dataModel);
+        <#list modelConfig.models as modelInfo>
+        <#if modelInfo.groupKey??>
+        dataModel.set${modelInfo.type}(${modelInfo.groupKey});
+        </#if>
+        </#list>
         System.out.println("配置信息: " + dataModel);
         // 执行代码生成方法
         FileGenerator.doGenerate(dataModel);

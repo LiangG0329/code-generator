@@ -3,6 +3,7 @@ package com.code.maker.meta;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.FileUtil;
@@ -89,40 +90,61 @@ public class MetaValidator {
             fileConfig.setType(defaultType);
         }
 
-        // fileInfo默认值
+        // fileDTO 默认值
         List<FileDTO> files = fileConfig.getFiles();
         if (CollectionUtil.isEmpty(files)) {
             return;
         }
+        ValidAndFillFiles(files);
+    }
+
+    /**
+     * fileConfig的 files校验和默认值设置
+     * @param files fileConfig的 file 列表
+     */
+    private static void ValidAndFillFiles(List<FileDTO> files) {
         for (FileDTO file : files) {
-            // inputPath 必填
-            String inputPath = file.getInputPath();
-            if (StrUtil.isBlank(inputPath)) {
-                throw new MetaException("未填写 inputPath");
-            }
-            // outputPath: 默认值 等于inputPath
-            String outputPath = file.getOutputPath();
-            if (StrUtil.isEmpty(outputPath)) {
-                file.setOutputPath(inputPath);
-            }
-            // type: 默认 inputPath 有文件后缀（如 .java）为 file，否则为 dir
             String fileType = file.getType();
-            if (StrUtil.isBlank(fileType)) {
-                // 无文件后缀
-                if (StrUtil.isBlank(FileUtil.getSuffix(inputPath))) {
-                    file.setType(FileTypeEnum.DIR.getValue());
-                } else {
-                    file.setType(FileTypeEnum.FILE.getValue());
+            // GROUP 分组类型，无 inputPath,outputPath
+            if (FileTypeEnum.GROUP.getValue().equals(fileType)) {
+                if (StrUtil.isBlank(file.getGroupKey())) {
+                    throw new MetaException("未填写 groupKey");
                 }
-            }
-            // generateType: 如果文件结尾不为 .ftl, generateType 默认为 static, 否则为 dynamic
-            String generateType = file.getGenerateType();
-            if (StrUtil.isBlank(generateType)) {
-                // .ftl文件 动态模板
-                if (inputPath.endsWith(".ftl")) {
-                    file.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
-                } else {
-                    file.setGenerateType(FileGenerateTypeEnum.STATIC.getValue());
+                if (StrUtil.isBlank(file.getGroupName())) {
+                    throw new MetaException("未填写 groupName");
+                }
+                List<FileDTO> groupFiles = file.getFiles();
+                ValidAndFillFiles(groupFiles);
+            } else {
+                // 其他类型，inputPath 必填
+                String inputPath = file.getInputPath();
+                if (StrUtil.isBlank(inputPath)) {
+                    throw new MetaException("未填写 inputPath");
+                }
+                // outputPath: 默认值 等于inputPath
+                String outputPath = file.getOutputPath();
+                if (StrUtil.isEmpty(outputPath)) {
+                    file.setOutputPath(inputPath);
+                }
+
+                // type: 默认 inputPath 有文件后缀（如 .java）为 file，否则为 dir
+                if (StrUtil.isBlank(fileType)) {
+                    // 无文件后缀
+                    if (StrUtil.isBlank(FileUtil.getSuffix(inputPath))) {
+                        file.setType(FileTypeEnum.DIR.getValue());
+                    } else {
+                        file.setType(FileTypeEnum.FILE.getValue());
+                    }
+                }
+                // generateType: 如果文件结尾不为 .ftl, generateType 默认为 static, 否则为 dynamic
+                String generateType = file.getGenerateType();
+                if (StrUtil.isBlank(generateType)) {
+                    // .ftl文件 动态模板
+                    if (inputPath.endsWith(".ftl")) {
+                        file.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
+                    } else {
+                        file.setGenerateType(FileGenerateTypeEnum.STATIC.getValue());
+                    }
                 }
             }
         }
@@ -141,18 +163,42 @@ public class MetaValidator {
         if (CollectionUtil.isEmpty(models)) {
             return;
         }
+        ValidAndFillModels(models);
+    }
+
+    /**
+     * modelConfig的models列表校验和默认值设置
+     * @param models model列表
+     */
+    private static void ValidAndFillModels(List<ModelConfigDTO.ModelDTO> models) {
         for (ModelConfigDTO.ModelDTO model : models) {
-            // 输出路径默认值
-            String fieldName = model.getFieldName();
-            if (StrUtil.isBlank(fieldName)) {
-                throw new MetaException("未填写 fieldName");
+            String groupKey = model.getGroupKey();
+            // group model, groupKey不能为空白字符串
+            if (StrUtil.isNotEmpty(groupKey)) {
+                if (StrUtil.isBlank(groupKey)) {
+                    throw new MetaException("groupKey为空白字符串");
+                }
+                // 生成中间参数
+                List<ModelConfigDTO.ModelDTO> groupModels = model.getModels();
+                String allArgStr = model.getModels().stream()
+                                .map(groupModel -> String.format("\"--%s\"", groupModel.getFieldName()))
+                                .collect(Collectors.joining(", "));
+                model.setAllArgsStr(allArgStr);  // 设置中间参数
+                ValidAndFillModels(groupModels);
+            } else {
+                // fieldName 必填
+                String fieldName = model.getFieldName();
+                if (StrUtil.isBlank(fieldName)) {
+                    throw new MetaException("未填写 fieldName");
+                }
+
+                String modelInfoType = model.getType();
+                if (StrUtil.isEmpty(modelInfoType)) {
+                    // 默认类型为String
+                    model.setType(ModelTypeEnum.STRING.getValue());
+                }
             }
 
-            String modelInfoType = model.getType();
-            if (StrUtil.isEmpty(modelInfoType)) {
-                // 默认类型为String
-                model.setType(ModelTypeEnum.STRING.getValue());
-            }
         }
     }
 }

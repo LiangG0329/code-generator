@@ -10,7 +10,7 @@
 
 ## 使用说明
 
-执行项目根目录下的生成的脚本文件 *generator*：
+进入生成的*项目根目录*,执行项目根目录下的生成的脚本文件 *generator*：
 
 ```
 generator <命令> <选项参数>
@@ -19,7 +19,7 @@ generator <命令> <选项参数>
 示例命令：
 
 ```
-generator generate <#list modelConfig.models as modelInfo>-${modelInfo.abbr} </#list>  # 代码生成
+generator generate<#list modelConfig.models as modelInfo><#if modelInfo.fieldName??> --${modelInfo.fieldName}<#if modelInfo.abbr??>|-${modelInfo.abbr}</#if></#if></#list>  # 代码生成
 generator config  # 输出动态参数的信息
 generator list  # 输出子文件列表
 ```
@@ -27,7 +27,9 @@ generator list  # 输出子文件列表
 ## 参数说明
 
 <#list modelConfig.models as modelInfo>
-${modelInfo?index + 1}）${modelInfo.fieldName}
+<#-- 命令选项 -->
+<#if modelInfo.fieldName??>
+${modelInfo?index + 1}) ${modelInfo.fieldName}
 
 类型：${modelInfo.type}
 
@@ -35,7 +37,17 @@ ${modelInfo?index + 1}）${modelInfo.fieldName}
 
 默认值：${modelInfo.defaultValue?c}
 
-缩写： -${modelInfo.abbr}
+<#if modelInfo.abbr??>子命令缩写： -${modelInfo.abbr}</#if>
+</#if>
+<#-- 分组命令 -->
+<#if modelInfo.groupKey??>
 
+类型：${modelInfo.type}
+
+描述：${modelInfo.description}
+
+分组命令选项：<#list modelInfo.models as groupModel><#if groupModel.fieldName??> --${groupModel.fieldName}<#if groupModel.abbr??>|-${groupModel.abbr}</#if></#if></#list>
+
+</#if>
 
 </#list>

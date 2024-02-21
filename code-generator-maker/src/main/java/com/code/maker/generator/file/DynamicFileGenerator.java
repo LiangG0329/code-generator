@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 /**
  * 动态文件生成
- * @author
+ * @author Liang
  * @create 2024/2/13
  */
 public class DynamicFileGenerator {
@@ -24,8 +24,8 @@ public class DynamicFileGenerator {
         String inputPath = projectPath + File.separator + "src/main/resources/templates/MainTemplate.java.ftl";
         String outputPath = projectPath + File.separator + "output/MainTemplate.java";
         DataModel dataModel = new DataModel();
-        dataModel.setAuthor("liang");
-        dataModel.setOutputText("out:");
+//        dataModel.setAuthor("liang");
+//        dataModel.setOutputText("out:");
         doGenerate(inputPath, outputPath, dataModel);
     }
 
