@@ -7,6 +7,10 @@ import cn.hutool.json.JSONUtil;
 import com.code.maker.meta.Meta;
 import com.code.maker.meta.enums.FileGenerateTypeEnum;
 import com.code.maker.meta.enums.FileTypeEnum;
+import com.code.maker.template.enums.FileFilterRangeEnum;
+import com.code.maker.template.enums.FileFilterRuleEnum;
+import com.code.maker.template.model.FileFilterConfig;
+import com.code.maker.template.model.TemplateMakerFileConfig;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -14,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Filter;
 import java.util.stream.Collectors;
 
 /**
@@ -26,13 +31,13 @@ public class TemplateMaker {
      * 模板制作
      * @param meta 提供项目基本信息,保存文件和模型信息的对象,用于生成配置文件
      * @param originProjectPath 原始模板项目路径
-     * @param fileInputPathList 输入文件路径列表,支持输入多个路径
+     * @param templateMakerFileConfig 模板制作工具文件配置封装类,包含文件路径和过滤配置列表
      * @param modelDTO 模型信息
      * @param searchStr 替换字段
      * @param id 工作空间 id
      * @return 生成的模板对应的工作空间id.若指定的id不存在或未指定,则自动生成id; 否则返回id等于指定id
      */
-    public static long makeTemplate(Meta meta, String originProjectPath, List<String> fileInputPathList, Meta.ModelConfigDTO.ModelDTO modelDTO, String searchStr,Long id) {
+    public static long makeTemplate(Meta meta, String originProjectPath, TemplateMakerFileConfig templateMakerFileConfig, Meta.ModelConfigDTO.ModelDTO modelDTO, String searchStr, Long id) {
         // 没有id则生成
         if (id == null) {
             id = IdUtil.getSnowflakeNextId(); // 每次制作分配一个唯一 id（使用雪花算法），作为工作空间的名称,从而实现隔离
@@ -66,21 +71,20 @@ public class TemplateMaker {
 
         // 3.输入模型参数信息由 modelDTO 参数提供
 
+        List<TemplateMakerFileConfig.FileConfigDTO> templateMakerFileConfigList = templateMakerFileConfig.getFiles();
         // 二.使用字符串替换，生成模板文件
         List<Meta.FileConfigDTO.FileDTO> fileDTOList = new ArrayList<>();
         // 支持输入多个路径,遍历文件路径列表,多次执行生成模板
-        for (String fileInputPath: fileInputPathList) {
-            String fileInputAbsolutePath = sourceRootPath + File.separator + fileInputPath;
-            // 输入路径 fileInputAbsolutePath 为目录,递归遍历并获取目录下的所有文件列表,支持批量制作模板文件
-            if (FileUtil.isDirectory(fileInputAbsolutePath)) {
-                List<File> files = FileUtil.loopFiles(fileInputAbsolutePath);
-                for (File file: files) {
-                    Meta.FileConfigDTO.FileDTO fileDTO = makeFileTemplate(modelDTO, searchStr, sourceRootPath, file);
-                    fileDTOList.add(fileDTO);
-                }
-            } else {
-                // 输入路径是文件,当个文件制作模板
-                Meta.FileConfigDTO.FileDTO fileDTO = makeFileTemplate(modelDTO, searchStr, sourceRootPath, new File(fileInputAbsolutePath));
+        for (TemplateMakerFileConfig.FileConfigDTO fileConfigDTO: templateMakerFileConfigList) {
+            String fileInputAbsolutePath = fileConfigDTO.getPath();
+            // 如果填的是相对路径，要改为绝对路径
+            if (!fileInputAbsolutePath.startsWith(sourceRootPath)) {
+                fileInputAbsolutePath = sourceRootPath + File.separator + fileInputAbsolutePath;
+            }
+            // 获取过滤后的文件列表(过滤后不会存在目录) 递归遍历过滤后的文件列表,支持批量制作模板文件
+            List<File> files = FileFilter.doFilter(fileInputAbsolutePath, fileConfigDTO.getFileFilterConfigList());
+            for (File file: files) {
+                Meta.FileConfigDTO.FileDTO fileDTO = makeFileTemplate(modelDTO, searchStr, sourceRootPath, file);
                 fileDTOList.add(fileDTO);
             }
         }
@@ -181,6 +185,7 @@ public class TemplateMaker {
             fileDTO.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
             // 生成 .ftl 模板文件
             FileUtil.writeUtf8String(newFileContent, fileOutputAbsolutePath);
+            System.out.println("生成模板文件 fileOutputAbsolutePath = " + fileOutputAbsolutePath);
         }
 
 
@@ -241,9 +246,27 @@ public class TemplateMaker {
         modelDTO.setType("String");
         modelDTO.setDefaultValue("className");
 
-        String searchStr = "BaseResponse";
+        String searchStr = "PageRequest";
 
-        long id = TemplateMaker.makeTemplate(meta, originProjectPath, fileInputPathList, modelDTO, searchStr, 1760851793752944640L);
+        // 文件过滤测试
+        TemplateMakerFileConfig templateMakerFileConfig = new TemplateMakerFileConfig();
+        TemplateMakerFileConfig.FileConfigDTO fileConfig1 = new TemplateMakerFileConfig.FileConfigDTO();
+        fileConfig1.setPath(inputFilePath1);
+
+        List<FileFilterConfig> fileFilterConfigList = new ArrayList<>();
+        FileFilterConfig fileFilterConfig = FileFilterConfig.builder()
+                .range(FileFilterRangeEnum.FILE_NAME.getValue())
+                .rule(FileFilterRuleEnum.CONTAINS.getValue())
+                .value("Page")
+                .build();
+        fileFilterConfigList.add(fileFilterConfig);
+        fileConfig1.setFileFilterConfigList(fileFilterConfigList);
+
+        TemplateMakerFileConfig.FileConfigDTO fileConfig2 = new TemplateMakerFileConfig.FileConfigDTO();
+        fileConfig2.setPath(inputFilePath2);
+        templateMakerFileConfig.setFiles(Arrays.asList(fileConfig1, fileConfig2));
+
+        long id = TemplateMaker.makeTemplate(meta, originProjectPath, templateMakerFileConfig, modelDTO, searchStr, 1760851793752944640L);
         System.out.println("id = " + id);
     }
 }
