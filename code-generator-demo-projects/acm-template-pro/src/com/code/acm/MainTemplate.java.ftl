@@ -29,7 +29,7 @@ public class MainTemplate {
                 sum += num;
             }
 
-            System.out.println("${mainTemplate.outputText}" + sum);
+            System.out.println("Sum: " + sum);
 <#if loop>
         }
 </#if>

@@ -39,6 +39,7 @@ public class Meta {
             private String type;
             private String generateType;
             private String condition;
+            // 分组属性
             private String groupKey;
             private String groupName;
             private List<FileDTO> files;
@@ -58,6 +59,7 @@ public class Meta {
             private String description;
             private Object defaultValue;
             private String abbr;
+            // 分组属性
             private String groupKey;
             private String groupName;
             private String condition;

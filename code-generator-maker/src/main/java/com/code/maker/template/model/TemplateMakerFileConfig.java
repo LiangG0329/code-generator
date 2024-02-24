@@ -13,12 +13,29 @@ import java.util.List;
  */
 @Data
 public class TemplateMakerFileConfig {
+
     private List<TemplateMakerFileConfig.FileConfigDTO> files;
 
+    private FileGroupConfig fileGroupConfig;
+
+    /**
+     * 文件路径和文件过滤配置类
+     */
     @Data
     @NoArgsConstructor
     public static class FileConfigDTO {
         private String path;
         private List<FileFilterConfig> fileFilterConfigList;
+    }
+
+    /**
+     * 文件分组配置类
+     */
+    @Data
+    @NoArgsConstructor
+    public static class FileGroupConfig {
+        private String condition;
+        private String groupKey;
+        private String groupName;
     }
 }

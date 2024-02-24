@@ -130,3 +130,4 @@ code-gengrator.iml
 /code-generator-basic/src/main/java/com/code/cli/example/
 /code-generator-basic/src/main/java/com/code/cli/pattern/
 /code-generator-maker/generated
+code-generator-maker/.temp
