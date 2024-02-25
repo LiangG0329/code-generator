@@ -49,15 +49,15 @@ public class TemplateMaker {
 
         // 复制目录
         String tempDirPath = projectPath + File.separator + ".temp";  // .temp 临时目录作为工作空间的根目录
-        String templatePath = tempDirPath + File.separator + id;
+        String templatePath = tempDirPath + File.separator + id;  // .temp/id/..
         // 是否为首次制作模板
         // 支持多次制作: 目录不存在，则是首次制作;否则非首次,不再执行复制
         if (!FileUtil.exist(templatePath)) {
             FileUtil.mkdir(templatePath);
             FileUtil.copy(originProjectPath, templatePath, true);
-            System.out.println("未指定id或id指定的工作空间不存在,生成工作空间,制作新模板. templatePath = " + templatePath);
+            System.out.println("未指定id或id指定的工作空间不存在,生成工作空间. templatePath = " + templatePath);
         } else {
-            System.out.println("已指定工作空间,修改已有模板. templatePath = " + templatePath);
+            System.out.println("已指定工作空间. templatePath = " + templatePath);
         }
 
         // 一.输入信息
@@ -82,13 +82,15 @@ public class TemplateMaker {
             if (!fileInputAbsolutePath.startsWith(sourceRootPath)) {
                 fileInputAbsolutePath = sourceRootPath + File.separator + fileInputAbsolutePath;
             }
-            // 获取过滤后的文件列表(过滤后不会存在目录) 递归遍历过滤后的文件列表,支持批量制作模板文件
+            // 获取根据过滤配置过滤后的文件列表(过滤后不会存在目录)
             List<File> files = FileFilter.doFilter(fileInputAbsolutePath, fileConfigDTO.getFileFilterConfigList());
+            // 过滤处理,不处理已生成的 FTL 模板文件
+            files = files.stream()
+                    .filter(file -> !file.getAbsolutePath().endsWith(".ftl"))
+                    .collect(Collectors.toList());
+            // 遍历过滤后的文件列表,支持批量制作模板文件
             for (File file: files) {
                 Meta.FileConfigDTO.FileDTO fileDTO = makeFileTemplate(templateMakerModelConfig, sourceRootPath, file);
-                if (fileDTO == null) {
-                    continue;
-                }
                 fileDTOList.add(fileDTO);
             }
         }
@@ -146,7 +148,7 @@ public class TemplateMaker {
         }
 
         // 三.生成配置文件 meta.json
-        String metaOutputPath = sourceRootPath + File.separator + "meta.json";
+        String metaOutputPath = templatePath + File.separator + "meta.json";
         // 1.配置参数 fileConfig modelConfig
 
         // 支持多次制作: 如果已有 meta.json 文件，说明不是第一次制作,则在 meta 基础上进行修改,追加新配置参数;否则执行生成
@@ -197,22 +199,19 @@ public class TemplateMaker {
         // 制作模板的原始文件的绝对路径（用于制作模板）
         // 注意 win 系统需要对路径进行转义
         String fileInputAbsolutePath = inputFile.getAbsolutePath().replaceAll("\\\\", "/");
-        if (fileInputAbsolutePath.endsWith(".ftl")) {
-            // 原始文件不为.ftl文件
-            return null;
-        }
         String fileOutputAbsolutePath = fileInputAbsolutePath + ".ftl";
 
         // 文件输入输出相对路径（用于生成配置）
-        String fileInputPath = fileInputAbsolutePath.replace(sourceRootPath + "/", "");
-        String fileOutputPath = fileInputPath + ".ftl";
+        String fileInputPath = fileInputAbsolutePath.replace(sourceRootPath + "/", "");  // 其他文件 .java .yml ...
+        String fileOutputPath = fileInputPath + ".ftl";  // FTL文件
 
         // 3.输入模型参数信息由 modelDTO 参数提供
 
         // 二.使用字符串替换，生成模板文件
         String fileContent;
         // 支持多次制作: 如果已有 .ftl模板文件，说明不是第一次制作，则在已生成的模板基础上再次修改模板
-        if (FileUtil.exist(fileOutputAbsolutePath)) {
+        boolean hasTemplateFile = FileUtil.exist(fileOutputAbsolutePath);
+        if (hasTemplateFile) {
             fileContent = FileUtil.readUtf8String(fileOutputAbsolutePath);  // 读取已生成的模板文件内容
         } else {
             fileContent = FileUtil.readUtf8String(fileInputAbsolutePath);  // 读取原始文件作为模板原型
@@ -238,25 +237,31 @@ public class TemplateMaker {
         // 三.生成配置文件信息对象,并返回
         // fileDTO
         Meta.FileConfigDTO.FileDTO fileDTO = new Meta.FileConfigDTO.FileDTO();
-        fileDTO.setInputPath(fileInputPath);
-        fileDTO.setOutputPath(fileOutputPath);
+        // 注意文件输入路径要和输出路径反转,即 meta文件(代码生成器配置文件) 内容应该以FTL文件作为输入路径,生成文件作为输出
+        fileDTO.setInputPath(fileOutputPath);
+        fileDTO.setOutputPath(fileInputPath);
         fileDTO.setType(FileTypeEnum.FILE.getValue());
+        fileDTO.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
 
-        // 生成文件和原文件内容一致且没有同名.ftl文件，则当前文件未制作模板，为static静态生成;若内容一致但存在同名.ftl模板文件,则此次生成未修改旧模板,类型为dynamic
-        if (newFileContent.equals(fileContent)) {
-            if (!FileUtil.exist(fileOutputAbsolutePath)) {
-                // 静态生成,meta.json中 输出路径=输入路径(即输出文件不是.ftl文件),generateType=static
-                fileDTO.setOutputPath(fileInputPath);
+        // - 生成文件和原文件内容一致且没有同名.ftl文件，则当前文件未制作模板，为static静态生成;
+        // - 若内容一致但存在同名.ftl模板文件,则此次生成未修改旧模板,内容不同则此次生成修改旧模版,类型都为dynamic;
+        // 是否更改了文件内容
+        boolean contentEquals = newFileContent.equals(fileContent);
+        if (!hasTemplateFile) {
+            if (contentEquals) {
+                // 静态生成,meta.json中 输入路径=生成文件路径(即输出文件不是.ftl文件), generateType=static
+                fileDTO.setInputPath(fileInputPath);
                 fileDTO.setGenerateType(FileGenerateTypeEnum.STATIC.getValue());
             } else {
-                fileDTO.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
+                // 不存在.ftl模版文件,且生成文件内容与原始文件不同,即添加了动态参数,为动态生成, generateType=dynamic,输出.ftl 模板文件
+                FileUtil.writeUtf8String(newFileContent, fileOutputAbsolutePath);
+                System.out.println("生成新模板文件 fileOutputAbsolutePath = " + fileOutputAbsolutePath);
             }
-        } else  {
-            fileDTO.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
-            // 生成 .ftl 模板文件
+        } else if (!contentEquals) {
+            // 存在.ftl模版文件,且生成文件内容与原始文件不同,即添加了动态参数,为动态生成
             FileUtil.writeUtf8String(newFileContent, fileOutputAbsolutePath);
-            System.out.println("生成模板文件 fileOutputAbsolutePath = " + fileOutputAbsolutePath);
-        }
+            System.out.println("修改已有模板文件 fileOutputAbsolutePath = " + fileOutputAbsolutePath);
+        }  // 否则即存在.ftl模版文件,且内容未修改,保持 generateType=dynamic,且不重新生成
 
         return fileDTO;
     }
@@ -286,7 +291,7 @@ public class TemplateMaker {
             List<Meta.FileConfigDTO.FileDTO> mergeFileDTOList = new ArrayList<>(tempFileDTOList.stream()
                     .flatMap(fileDTO -> fileDTO.getFiles().stream())
                     .collect(
-                            Collectors.toMap(Meta.FileConfigDTO.FileDTO::getInputPath, o -> o, (e, r) -> r)  // 同组内文件去重
+                            Collectors.toMap(Meta.FileConfigDTO.FileDTO::getOutputPath, o -> o, (e, r) -> r)  // 同组内文件去重
                     ).values());
 
             // 每个group使用最新的group配置(tempFileDTOList中最后一个)
@@ -304,7 +309,7 @@ public class TemplateMaker {
                 .filter(fileDTO -> StrUtil.isBlank(fileDTO.getGroupKey())).collect(Collectors.toList());
         resultList.addAll(new ArrayList<>(noGroupKeyFileDTOList.stream()
                 .collect(
-                        Collectors.toMap(Meta.FileConfigDTO.FileDTO::getInputPath, o -> o, (e, r) -> r)  // 非分组文件去重
+                        Collectors.toMap(Meta.FileConfigDTO.FileDTO::getOutputPath, o -> o, (e, r) -> r)  // 非分组文件去重
                 ).values()));
 
         return resultList;
@@ -439,7 +444,7 @@ public class TemplateMaker {
         List<TemplateMakerModelConfig.ModelConfigDTO> modelConfigDTOList = Arrays.asList(modelInfoConfig1, modelInfoConfig2);
         templateMakerModelConfig.setModels(modelConfigDTOList);
 
-        long id = TemplateMaker.makeTemplate(meta, originProjectPath, templateMakerFileConfig, templateMakerModelConfig, 1760851793752944640L);
+        long id = TemplateMaker.makeTemplate(meta, originProjectPath, templateMakerFileConfig, templateMakerModelConfig, 1L);
         System.out.println("id = " + id);
     }
 }
