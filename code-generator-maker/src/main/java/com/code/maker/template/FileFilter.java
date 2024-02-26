@@ -73,7 +73,7 @@ public class FileFilter {
                     content = fileContent;
                     break;
                 default:
-                    content = fileName;
+
             }
 
             // 对文件规则过滤

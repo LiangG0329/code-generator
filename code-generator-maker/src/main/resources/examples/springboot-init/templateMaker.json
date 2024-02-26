@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "meta": {
+    "name": "spring-boot-init-generator",
+    "description": "Spring Boot 模板项目生成器"
+  },
+  "originProjectPath": "../../../code-generator-demo-projects/springboot-init"
+}

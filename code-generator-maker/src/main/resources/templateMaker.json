@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "name": "spring-boot-init-generator",
+    "description": "Spring Boot 示例模板生成器"
+  },
+  "originProjectPath": "../../../code-generator-demo-projects/springboot-init",
+  "fileConfig": {
+    "files": [
+      {
+        "path": "src/main/java/com/code/springbootinit/common"
+      }
+    ]
+  },
+  "modelConfig": {
+    "models": [
+      {
+        "fieldName": "className",
+        "type": "String",
+        "defaultValue": true,
+        "replaceText": "BaseResponse"
+      }
+    ]
+  }
+}

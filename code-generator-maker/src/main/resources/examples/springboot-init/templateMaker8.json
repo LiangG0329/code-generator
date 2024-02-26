@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "fileConfig": {
+    "files": [
+      {
+        "path": "src/main/java/com/code/springbootinit/model/dto/post/PostEsDTO.java",
+        "condition": "needPost && needEs"
+      }
+    ]
+  },
+  "modelConfig": {
+    "models": [
+      {
+        "fieldName": "needEs",
+        "type": "Boolean",
+        "description": "是否开启ES功能",
+        "defaultValue": true
+      }
+    ]
+  },
+  "outputConfig": {
+    "removeGroupFilesFromRoot": false,
+    "removeFilesFromGroup": true,
+    "files": [
+      {
+        "path": "src/main/java/com/code/springbootinit/model/dto/post/PostEsDTO.java"
+      }
+    ]
+  }
+}

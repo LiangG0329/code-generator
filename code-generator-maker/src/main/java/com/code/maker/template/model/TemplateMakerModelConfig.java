@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * 模板制作工具模型配置封装类
+ *
  * @author Liang
  * @create 2024/2/24
  */
@@ -43,5 +44,7 @@ public class TemplateMakerModelConfig {
         private String condition;
         private String groupKey;
         private String groupName;
+        private String type;
+        private String description;
     }
 }

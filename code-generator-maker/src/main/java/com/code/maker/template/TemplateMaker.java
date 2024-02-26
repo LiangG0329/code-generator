@@ -11,15 +11,11 @@ import com.code.maker.meta.enums.FileGenerateTypeEnum;
 import com.code.maker.meta.enums.FileTypeEnum;
 import com.code.maker.template.enums.FileFilterRangeEnum;
 import com.code.maker.template.enums.FileFilterRuleEnum;
-import com.code.maker.template.model.FileFilterConfig;
-import com.code.maker.template.model.TemplateMakerFileConfig;
-import com.code.maker.template.model.TemplateMakerModelConfig;
+import com.code.maker.template.model.*;
+import com.code.maker.template.utils.TemplateMakerUtils;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Filter;
 import java.util.stream.Collectors;
 
 /**
@@ -30,14 +26,39 @@ import java.util.stream.Collectors;
 public class TemplateMaker {
     /**
      * 模板制作
+     *
+     * @param templateMakerConfig 模板制作方法参数封装的配置类对象
+     * @return 生成的模板对应的工作空间id.若指定的id不存在或未指定,则自动生成id; 否则返回id等于指定id
+     */
+    public static long makeTemplate(TemplateMakerConfig templateMakerConfig) {
+        Meta meta = templateMakerConfig.getMeta();
+        String originProjectPath = templateMakerConfig.getOriginProjectPath();
+        TemplateMakerFileConfig templateMakerFileConfig = templateMakerConfig.getFileConfig();
+        TemplateMakerModelConfig templateMakerModelConfig = templateMakerConfig.getModelConfig();
+        TemplateMakerOutputConfig templateMakerConfigOutputConfig = templateMakerConfig.getOutputConfig();
+        Long id = templateMakerConfig.getId();
+     
+        return makeTemplate(meta, originProjectPath, templateMakerFileConfig, templateMakerModelConfig, templateMakerConfigOutputConfig,id);
+    }
+
+    /**
+     * 模板制作
+     *
      * @param meta 提供项目基本信息,保存文件和模型信息的对象,用于生成配置文件
-     * @param originProjectPath 原始模板项目路径
+     * @param originProjectPath 原始模板项目路径(如果为相对路径,是相对main文件夹的路径)
      * @param templateMakerFileConfig 模板制作工具文件配置封装类,包含文件路径和过滤配置列表
      * @param templateMakerModelConfig 模板制作工具模型配置封装类,包含模型基本信息和模型分组信息
      * @param id 工作空间 id
      * @return 生成的模板对应的工作空间id.若指定的id不存在或未指定,则自动生成id; 否则返回id等于指定id
      */
-    public static long makeTemplate(Meta meta, String originProjectPath, TemplateMakerFileConfig templateMakerFileConfig, TemplateMakerModelConfig templateMakerModelConfig, Long id) {
+    public static long makeTemplate(
+            Meta meta,
+            String originProjectPath,
+            TemplateMakerFileConfig templateMakerFileConfig,
+            TemplateMakerModelConfig templateMakerModelConfig,
+            TemplateMakerOutputConfig templateMakerOutputConfig,
+            Long id) {
+
         // 没有id则生成
         if (id == null) {
             id = IdUtil.getSnowflakeNextId(); // 每次制作分配一个唯一 id（使用雪花算法），作为工作空间的名称,从而实现隔离
@@ -61,96 +82,25 @@ public class TemplateMaker {
         }
 
         // 一.输入信息
-        // 1.输入项目基本信息由参数 meta 提供
+        // sourceRootPath 工作空间内复制项目的根路径
+        String sourceRootPath = FileUtil.loopFiles(new File(templatePath), 1, null)
+                .stream()
+                .filter(File::isDirectory)
+                .findFirst()
+                .orElseThrow(RuntimeException::new)
+                .getAbsolutePath();
 
-        // 2.输入文件信息,输入文件路径由 fileInputPath 参数提供
-        // sourceRootPath 工作空间内复制项目的路径
-        String sourceRootPath = templatePath + File.separator + FileUtil.getLastPathEle(Paths.get(originProjectPath)).toString();
         // 注意 win 系统需要对路径进行转义
         sourceRootPath = sourceRootPath.replaceAll("\\\\", "/");
 
-        // 3.输入模型参数信息由 modelDTO 参数提供
+        // 二、制作文件模板
+        List<Meta.FileConfigDTO.FileDTO> fileDTOList = makeFileTemplates(templateMakerFileConfig, templateMakerModelConfig, sourceRootPath);
 
-        // 二.使用字符串替换，生成模板文件
-        // 本次新增的文件配置列表
-        List<Meta.FileConfigDTO.FileDTO> fileDTOList = new ArrayList<>();
-        List<TemplateMakerFileConfig.FileConfigDTO> templateMakerFileConfigList = templateMakerFileConfig.getFiles();
-        // 支持输入多个路径,遍历文件路径列表,多次执行生成模板
-        for (TemplateMakerFileConfig.FileConfigDTO fileConfigDTO: templateMakerFileConfigList) {
-            String fileInputAbsolutePath = fileConfigDTO.getPath();
-            // 如果填的是相对路径，要改为绝对路径
-            if (!fileInputAbsolutePath.startsWith(sourceRootPath)) {
-                fileInputAbsolutePath = sourceRootPath + File.separator + fileInputAbsolutePath;
-            }
-            // 获取根据过滤配置过滤后的文件列表(过滤后不会存在目录)
-            List<File> files = FileFilter.doFilter(fileInputAbsolutePath, fileConfigDTO.getFileFilterConfigList());
-            // 过滤处理,不处理已生成的 FTL 模板文件
-            files = files.stream()
-                    .filter(file -> !file.getAbsolutePath().endsWith(".ftl"))
-                    .collect(Collectors.toList());
-            // 遍历过滤后的文件列表,支持批量制作模板文件
-            for (File file: files) {
-                Meta.FileConfigDTO.FileDTO fileDTO = makeFileTemplate(templateMakerModelConfig, sourceRootPath, file);
-                fileDTOList.add(fileDTO);
-            }
-        }
-
-        // 如果是文件组(一次制作可作为一个分组)
-        TemplateMakerFileConfig.FileGroupConfig fileGroupConfig = templateMakerFileConfig.getFileGroupConfig();
-        if (fileGroupConfig != null) {
-            String condition = fileGroupConfig.getCondition();
-            String groupName = fileGroupConfig.getGroupName();
-            String groupKey = fileGroupConfig.getGroupKey();
-
-            // 新增分组配置
-            Meta.FileConfigDTO.FileDTO groupFileDTO = new Meta.FileConfigDTO.FileDTO();
-            groupFileDTO.setCondition(condition);
-            groupFileDTO.setGroupName(groupName);
-            groupFileDTO.setGroupKey(groupKey);
-            // fileDTOList文件列表放入一个分组内
-            groupFileDTO.setFiles(fileDTOList);
-            fileDTOList = new ArrayList<>();
-            fileDTOList.add(groupFileDTO);  // 将分组文件包装后加入新列表
-        }
-
-        // 处理模型信息
-        List<TemplateMakerModelConfig.ModelConfigDTO> templateMakerModelConfigModels = templateMakerModelConfig.getModels();
-        // 转换为配置接受的 Meta.ModelConfigDTO.ModelDTO 对象列表
-        List<Meta.ModelConfigDTO.ModelDTO> inputModelDTOList = templateMakerModelConfigModels.stream()
-                .map(modelConfigDTO -> {
-                    Meta.ModelConfigDTO.ModelDTO modelDTO = new Meta.ModelConfigDTO.ModelDTO();
-                    BeanUtil.copyProperties(modelConfigDTO, modelDTO);
-                    return modelDTO;
-                }).collect(Collectors.toList());
-
-        // 本次新增的模型配置列表
-        List<Meta.ModelConfigDTO.ModelDTO> modelDTOList = new ArrayList<>();
-        
-        // 如果是模型组(一次制作可作为一个分组)
-        TemplateMakerModelConfig.ModelGroupConfig modelGroupConfig = templateMakerModelConfig.getModelGroupConfig();
-        if (modelGroupConfig != null) {
-            String condition = modelGroupConfig.getCondition();
-            String groupName = modelGroupConfig.getGroupName();
-            String groupKey = modelGroupConfig.getGroupKey();
-
-            // 新增分组配置
-            Meta.ModelConfigDTO.ModelDTO groupModelDTO = new Meta.ModelConfigDTO.ModelDTO();
-            groupModelDTO.setCondition(condition);
-            groupModelDTO.setGroupName(groupName);
-            groupModelDTO.setGroupKey(groupKey);
-            // 转化后的inputModelDTOList模型列表放入一个分组内
-            groupModelDTO.setModels(inputModelDTOList);
-            modelDTOList = new ArrayList<>();
-            modelDTOList.add(groupModelDTO);  // 将分组模型包装后加入新列表
-        } else {
-            // 不分组，添加所有的模型信息到列表
-            modelDTOList.addAll(inputModelDTOList);
-        }
+        List<Meta.ModelConfigDTO.ModelDTO> modelDTOList = getModelDTOList(templateMakerModelConfig);
 
         // 三.生成配置文件 meta.json
         String metaOutputPath = templatePath + File.separator + "meta.json";
         // 1.配置参数 fileConfig modelConfig
-
         // 支持多次制作: 如果已有 meta.json 文件，说明不是第一次制作,则在 meta 基础上进行修改,追加新配置参数;否则执行生成
         if (FileUtil.exist(metaOutputPath)) {
             meta = JSONUtil.toBean(FileUtil.readUtf8String(metaOutputPath), Meta.class);  // 读取json文件为String,再转化为对象
@@ -181,20 +131,155 @@ public class TemplateMaker {
             modelConfigDTO.setModels(newModelDTOList);
             meta.setModelConfig(modelConfigDTO);
         }
-        // 2.输出新的 meta.json 元信息文件或更新元信息文件
+        // 2.额外的输出配置
+        if (templateMakerOutputConfig != null) {
+            // 需要对外层和分组文件去重
+            if (templateMakerOutputConfig.isRemoveGroupFilesFromRoot()) {
+                List<Meta.FileConfigDTO.FileDTO> files = meta.getFileConfig().getFiles();
+                meta.getFileConfig().setFiles(TemplateMakerUtils.removeGroupFilesFromRoot(files));
+            }
+            // 需要从分组文件中移除目标文件
+            if (templateMakerOutputConfig.isRemoveFilesFromGroup()) {
+                List<TemplateMakerOutputConfig.FileConfigDTO> removeFiles = templateMakerOutputConfig.getFiles();
+                List<Meta.FileConfigDTO.FileDTO> files = meta.getFileConfig().getFiles();
+                meta.getFileConfig().setFiles(TemplateMakerUtils.removeFilesFromGroup(files, removeFiles));
+            }
+        }
+
+        // 3.输出新的 meta.json 元信息文件或更新已有元信息文件
         FileUtil.writeUtf8String(JSONUtil.toJsonPrettyStr(meta), metaOutputPath);  // 使用JSONUtil将对象转为String,再写文件
 
         return id;
     }
 
     /**
-     * 制作单个模板文件
+     * 获取模型对象列表
+     *
+     * @param templateMakerModelConfig 模板制作工具模型配置封装类,包含模型基本信息和模型分组信息
+     * @return 制作模板的模型对象列表
+     */
+    private static List<Meta.ModelConfigDTO.ModelDTO> getModelDTOList(TemplateMakerModelConfig templateMakerModelConfig) {
+        // 本次新增的模型对象列表
+        List<Meta.ModelConfigDTO.ModelDTO> modelDTOList = new ArrayList<>();
+
+        // 非空校验 若templateMakerModelConfig或templateMakerModelConfigList为空,直接返回空列表
+        if (templateMakerModelConfig == null) {
+            return modelDTOList;
+        }
+        List<TemplateMakerModelConfig.ModelConfigDTO> templateMakerModelConfigModels = templateMakerModelConfig.getModels();
+        if (CollUtil.isEmpty(templateMakerModelConfigModels)) {
+            return modelDTOList;
+        }
+
+        // 处理模型信息
+        // - 转换为配置接受的 Meta.ModelConfigDTO.ModelDTO 对象列表
+        List<Meta.ModelConfigDTO.ModelDTO> inputModelDTOList = templateMakerModelConfigModels.stream()
+                .map(modelConfigDTO -> {
+                    Meta.ModelConfigDTO.ModelDTO modelDTO = new Meta.ModelConfigDTO.ModelDTO();
+                    BeanUtil.copyProperties(modelConfigDTO, modelDTO);
+                    return modelDTO;
+                }).collect(Collectors.toList());
+
+        // 如果是模型组(一次制作可作为一个分组)
+        TemplateMakerModelConfig.ModelGroupConfig modelGroupConfig = templateMakerModelConfig.getModelGroupConfig();
+        if (modelGroupConfig != null) {
+            // 新增分组配置
+            Meta.ModelConfigDTO.ModelDTO groupModelDTO = new Meta.ModelConfigDTO.ModelDTO();
+            // 复制属性
+            BeanUtil.copyProperties(modelGroupConfig, groupModelDTO);
+
+            // 转化后的 inputModelDTOList 模型列表放入一个分组内
+            groupModelDTO.setModels(inputModelDTOList);
+            modelDTOList = new ArrayList<>();
+            modelDTOList.add(groupModelDTO);  // 将分组模型包装后加入新列表
+        } else {
+            // 不分组，添加所有的模型信息到列表
+            modelDTOList.addAll(inputModelDTOList);
+        }
+        return modelDTOList;
+    }
+
+    /**
+     * 制作文件模板
+     *
+     * @param templateMakerFileConfig 模板制作工具文件配置封装类对象
+     * @param templateMakerModelConfig 模板制作工具模型配置封装类对象
+     * @param sourceRootPath 工作空间内复制项目的路径
+     * @return  制作模板的文件对象列表
+     */
+    private static List<Meta.FileConfigDTO.FileDTO> makeFileTemplates(
+            TemplateMakerFileConfig templateMakerFileConfig,
+            TemplateMakerModelConfig templateMakerModelConfig,
+            String sourceRootPath) {
+        // 本次新增的文件对象列表
+        List<Meta.FileConfigDTO.FileDTO> fileDTOList = new ArrayList<>();
+
+        // 非空校验 若templateMakerFileConfig或templateMakerFileConfigList为空,直接返回空列表
+        if (templateMakerFileConfig == null) {
+            return fileDTOList;
+        }
+        List<TemplateMakerFileConfig.FileConfigDTO> templateMakerFileConfigList = templateMakerFileConfig.getFiles();
+        if (CollUtil.isEmpty(templateMakerFileConfigList)) {
+            return fileDTOList;
+        }
+
+        // 生成模板文件
+        // 支持输入多个路径,遍历文件路径列表,多次执行生成模板
+        for (TemplateMakerFileConfig.FileConfigDTO fileConfigDTO: templateMakerFileConfigList) {
+            String fileInputAbsolutePath = fileConfigDTO.getPath();
+            // 如果填的是相对路径，要改为绝对路径
+            if (!fileInputAbsolutePath.startsWith(sourceRootPath)) {
+                fileInputAbsolutePath = sourceRootPath + File.separator + fileInputAbsolutePath;
+            }
+            // 获取根据过滤配置过滤后的文件列表(过滤后不会存在目录)
+            List<File> files = FileFilter.doFilter(fileInputAbsolutePath, fileConfigDTO.getFilterConfigList());
+            // 过滤处理,不处理已生成的 FTL 模板文件
+            files = files.stream()
+                    .filter(file -> !file.getAbsolutePath().endsWith(".ftl"))
+                    .collect(Collectors.toList());
+            // 遍历过滤后的文件列表,支持批量制作模板文件
+            for (File file: files) {
+                Meta.FileConfigDTO.FileDTO fileDTO = makeFileTemplate(templateMakerModelConfig, sourceRootPath, file, fileConfigDTO);
+                fileDTOList.add(fileDTO);
+            }
+        }
+
+        // 如果是文件组(一次制作可作为一个分组)
+        TemplateMakerFileConfig.FileGroupConfig fileGroupConfig = templateMakerFileConfig.getFileGroupConfig();
+        if (fileGroupConfig != null) {
+            String condition = fileGroupConfig.getCondition();
+            String groupName = fileGroupConfig.getGroupName();
+            String groupKey = fileGroupConfig.getGroupKey();
+
+            // 新增分组配置
+            Meta.FileConfigDTO.FileDTO groupFileDTO = new Meta.FileConfigDTO.FileDTO();
+            groupFileDTO.setType(FileTypeEnum.GROUP.getValue());
+            groupFileDTO.setCondition(condition);
+            groupFileDTO.setGroupName(groupName);
+            groupFileDTO.setGroupKey(groupKey);
+            // fileDTOList文件列表放入一个分组内
+            groupFileDTO.setFiles(fileDTOList);
+            fileDTOList = new ArrayList<>();
+            fileDTOList.add(groupFileDTO);  // 将分组文件包装后加入新列表
+        }
+        return fileDTOList;
+    }
+
+    /**
+     * 制作单个文件模板
+     *
      * @param templateMakerModelConfig 模板制作工具模型配置封装类对象
      * @param sourceRootPath 工作空间内复制项目的路径
      * @param inputFile 需制作模板的文件对象
+     * @param fileConfigDTO 模板制作工具文件配置封装类中的文件信息对象
      * @return fileDTO配置文件信息对象
      */
-    public static Meta.FileConfigDTO.FileDTO makeFileTemplate(TemplateMakerModelConfig templateMakerModelConfig, String sourceRootPath, File inputFile) {
+    public static Meta.FileConfigDTO.FileDTO makeFileTemplate(
+            TemplateMakerModelConfig templateMakerModelConfig,
+            String sourceRootPath,
+            File inputFile,
+            TemplateMakerFileConfig.FileConfigDTO fileConfigDTO) {
+
         // 一.输入信息
         // 制作模板的原始文件的绝对路径（用于制作模板）
         // 注意 win 系统需要对路径进行转义
@@ -240,6 +325,7 @@ public class TemplateMaker {
         // 注意文件输入路径要和输出路径反转,即 meta文件(代码生成器配置文件) 内容应该以FTL文件作为输入路径,生成文件作为输出
         fileDTO.setInputPath(fileOutputPath);
         fileDTO.setOutputPath(fileInputPath);
+        fileDTO.setCondition(fileConfigDTO.getCondition());  // 支持对单个文件设置生成条件
         fileDTO.setType(FileTypeEnum.FILE.getValue());
         fileDTO.setGenerateType(FileGenerateTypeEnum.DYNAMIC.getValue());
 
@@ -406,7 +492,7 @@ public class TemplateMaker {
                 .value("java")
                 .build();
         fileFilterConfigList.add(fileFilterConfig);
-        fileConfig1.setFileFilterConfigList(fileFilterConfigList);
+        fileConfig1.setFilterConfigList(fileFilterConfigList);
 
         TemplateMakerFileConfig.FileConfigDTO fileConfig2 = new TemplateMakerFileConfig.FileConfigDTO();
         fileConfig2.setPath(inputFilePath2);
@@ -444,7 +530,7 @@ public class TemplateMaker {
         List<TemplateMakerModelConfig.ModelConfigDTO> modelConfigDTOList = Arrays.asList(modelInfoConfig1, modelInfoConfig2);
         templateMakerModelConfig.setModels(modelConfigDTOList);
 
-        long id = TemplateMaker.makeTemplate(meta, originProjectPath, templateMakerFileConfig, templateMakerModelConfig, 1L);
+        long id = TemplateMaker.makeTemplate(meta, originProjectPath, templateMakerFileConfig, templateMakerModelConfig, null, 1L);
         System.out.println("id = " + id);
     }
 }
