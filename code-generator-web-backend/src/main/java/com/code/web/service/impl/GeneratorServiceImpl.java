@@ -102,7 +102,7 @@ public class GeneratorServiceImpl extends ServiceImpl<GeneratorMapper, Generator
         // 拼接查询条件
         // 模糊查询
         if (StringUtils.isNotBlank(searchText)) {
-            queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText));
+            queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText).or().like("author", searchText));
         }
         queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
         queryWrapper.like(StringUtils.isNotBlank(description), "description", description);

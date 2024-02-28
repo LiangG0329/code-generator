@@ -72,6 +72,7 @@ public class GeneratorController {
         generatorService.validGenerator(generator, true);
         User loginUser = userService.getLoginUser(request);
         generator.setUserId(loginUser.getId());
+        generator.setAuthor(loginUser.getUserName());
         generator.setStatus(0);
         boolean result = generatorService.save(generator);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
