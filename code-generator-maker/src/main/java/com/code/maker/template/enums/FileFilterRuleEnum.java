@@ -1,10 +1,7 @@
 package com.code.maker.template.enums;
 
 import cn.hutool.core.util.ObjectUtil;
-import lombok.Data;
 import lombok.Getter;
-
-import java.net.FileNameMap;
 
 /**
  * 文件过滤规则枚举

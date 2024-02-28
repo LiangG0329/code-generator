@@ -1,7 +1,8 @@
 package com.code.springbootinit.common;
 
-import java.io.Serializable;
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * 删除请求

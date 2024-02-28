@@ -1,6 +1,5 @@
 package com.code.maker.template.model;
 
-import com.code.maker.meta.Meta;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

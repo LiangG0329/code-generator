@@ -1,7 +1,6 @@
 package com.code.maker.cli.command;
 
 import cn.hutool.core.bean.BeanUtil;
-
 import com.code.maker.generator.file.FileGenerator;
 import com.code.maker.model.DataModel;
 import lombok.Data;
