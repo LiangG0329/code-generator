@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 文件上传请求
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @Data
 public class UploadFileRequest implements Serializable {

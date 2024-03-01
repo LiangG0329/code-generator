@@ -32,7 +32,7 @@ import static com.code.web.constant.UserConstant.USER_LOGIN_STATE;
  * 用户服务实现
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @Service
 @Slf4j
@@ -75,6 +75,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setUserPassword(encryptPassword);
             String defaultUserName = "默认昵称_" + IdUtil.getSnowflakeNextIdStr();
             user.setUserName(defaultUserName);
+            String defaultAvatar = "https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png";
+            user.setUserAvatar(defaultAvatar);
             boolean saveResult = this.save(user);
             if (!saveResult) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");

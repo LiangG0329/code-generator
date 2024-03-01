@@ -5,13 +5,15 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 用户更新个人信息请求
- *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
+ * @create 2024/2/29
  */
 @Data
-public class UserUpdateMyRequest implements Serializable {
+public class UserEditRequest implements Serializable {
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 用户昵称

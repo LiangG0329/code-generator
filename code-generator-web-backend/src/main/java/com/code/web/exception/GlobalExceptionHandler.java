@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * 全局异常处理器
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @RestControllerAdvice
 @Slf4j

@@ -383,6 +383,13 @@ declare namespace API {
     userRole?: string;
   };
 
+  type UserEditRequest = {
+    id?: string;
+    userAvatar?: string;
+    userName?: string;
+    userProfile?: string;
+  };
+
   type UserVO = {
     createTime?: string;
     id?: string;

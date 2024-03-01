@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * 权限校验
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

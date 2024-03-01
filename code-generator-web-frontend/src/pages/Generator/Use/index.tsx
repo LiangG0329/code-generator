@@ -1,10 +1,11 @@
-import {getGeneratorVoByIdUsingGet, useGeneratorUsingPost,} from '@/services/backend/generatorController';
+import {getGeneratorVoByIdUsingGet, useGeneratorUsingPost} from '@/services/backend/generatorController';
 import {Link, useModel, useParams} from '@@/exports';
 import {DownloadOutlined} from '@ant-design/icons';
 import {PageContainer} from '@ant-design/pro-components';
 import {Button, Card, Col, Collapse, Form, Image, Input, message, Row, Space, Tag, Typography,} from 'antd';
 import {saveAs} from 'file-saver';
 import React, {useEffect, useState} from 'react';
+import {FALLBACK_IMAGE_URL} from "@/constants";
 
 /**
  * 生成器使用
@@ -159,7 +160,7 @@ const GeneratorUsePage: React.FC = () => {
             </Space>
           </Col>
           <Col flex="320px">
-            <Image src={data.picture} />
+            <Image src={data.picture} fallback={FALLBACK_IMAGE_URL}/>
           </Col>
         </Row>
       </Card>

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
  * SQL 工具
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 public class SqlUtils {
 

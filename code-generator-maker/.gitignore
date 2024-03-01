@@ -125,3 +125,5 @@ fabric.properties
 ### Custom template
 .idea
 generated
+/src/main/java/com/code/maker/cli/command/TestArgGroupCommand.java
+/src/main/java/com/code/maker/cli/command/TestGroupCommand.java

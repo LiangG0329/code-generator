@@ -6,9 +6,11 @@ import {Link, useModel, useParams} from '@@/exports';
 import {DownloadOutlined, EditOutlined} from '@ant-design/icons';
 import {PageContainer} from '@ant-design/pro-components';
 import {Button, Card, Col, Image, message, Row, Space, Tabs, Tag, Typography} from 'antd';
+import {history} from '@umijs/max';
 import {saveAs} from 'file-saver';
 import moment from 'moment';
 import React, {useEffect, useState} from 'react';
+import {FALLBACK_IMAGE_URL} from "@/constants";
 
 /**
  * 生成器详情页
@@ -22,6 +24,7 @@ const GeneratorDetailPage: React.FC = () => {
   const { initialState } = useModel('@@initialState');
   const { currentUser } = initialState ?? {};
   const my = currentUser?.id === data?.userId;
+  const canDownload = data.distPath !== null;
 
   /**
    * 加载数据
@@ -67,21 +70,28 @@ const GeneratorDetailPage: React.FC = () => {
   /**
    * 下载按钮
    */
-  const downloadButton = data.distPath && currentUser && (
+  // const downloadButton = data.distPath && currentUser && (
+  const downloadButton =  (
     <Button
-      icon={<DownloadOutlined />}
+      icon={<DownloadOutlined />} disabled={!canDownload}
       onClick={async () => {
-        const blob = await downloadGeneratorByIdUsingGet(
-          {
-            id: data.id,
-          },
-          {
-            responseType: 'blob',
-          },
-        );
-        // 使用 file-saver 来保存文件
-        const fullPath = data.distPath || '';
-        saveAs(blob, fullPath.substring(fullPath.lastIndexOf('/') + 1));
+        if (!currentUser) {
+          const defaultDownloadFailureMessage = '请先登录';
+          message.error(defaultDownloadFailureMessage);
+          history.push('/user/login?redirect=/generator/detail/' + id)
+        } else {
+          const blob = await downloadGeneratorByIdUsingGet(
+            {
+              id: data.id,
+            },
+            {
+              responseType: 'blob',
+            },
+          );
+          // 使用 file-saver 来保存文件
+          const fullPath = data.distPath || '';
+          saveAs(blob, fullPath.substring(fullPath.lastIndexOf('/') + 1));
+        }
       }}
     >
       下载
@@ -91,9 +101,10 @@ const GeneratorDetailPage: React.FC = () => {
   /**
    * 编辑按钮
    */
-  const editButton = my && (
+  // const editButton = my && (
+  const editButton = (
     <Link to={`/generator/update?id=${data.id}`}>
-      <Button icon={<EditOutlined />}>编辑</Button>
+      <Button icon={<EditOutlined />} disabled={!my}>编辑</Button>
     </Link>
   );
 
@@ -113,6 +124,8 @@ const GeneratorDetailPage: React.FC = () => {
             <Typography.Paragraph type="secondary">基础包：{data.basePackage}</Typography.Paragraph>
             <Typography.Paragraph type="secondary">版本：{data.version}</Typography.Paragraph>
             <Typography.Paragraph type="secondary">作者：{data.author}</Typography.Paragraph>
+            {canDownload? <Typography.Paragraph type="success">下载次数: 1</Typography.Paragraph>:
+              <Typography.Paragraph type="danger">暂无可下载文件资源</Typography.Paragraph>}
             <div style={{ marginBottom: 24 }} />
             <Space size="middle">
               <Link to={`/generator/use/${data.id}`}>
@@ -123,7 +136,7 @@ const GeneratorDetailPage: React.FC = () => {
             </Space>
           </Col>
           <Col flex="320px">
-            <Image src={data.picture} />
+            <Image src={data.picture} fallback={FALLBACK_IMAGE_URL}/>
           </Col>
         </Row>
       </Card>

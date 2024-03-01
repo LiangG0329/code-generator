@@ -11,7 +11,7 @@ import java.util.List;
  * 查询请求
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

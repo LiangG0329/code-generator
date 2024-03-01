@@ -43,6 +43,20 @@ export default [
     hideInMenu: true,
   },
   {
+    path: '/user/detail',
+    icon: 'plus',
+    component: './User/Detail',
+    name: '用户信息',
+    hideInMenu: true,
+  },
+  {
+    path: '/user/edit',
+    icon: 'plus',
+    component: './User/Update',
+    name: '修改用户信息',
+    hideInMenu: true,
+  },
+  {
     path: '/admin',
     icon: 'crown',
     name: "管理页",

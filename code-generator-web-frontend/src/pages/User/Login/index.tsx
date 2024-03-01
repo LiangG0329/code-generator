@@ -82,7 +82,7 @@ const Login: React.FC = () => {
             items={[
               {
                 key: 'account',
-                label: '账户密码登录',
+                label: '账号密码登录',
               },
             ]}
           />

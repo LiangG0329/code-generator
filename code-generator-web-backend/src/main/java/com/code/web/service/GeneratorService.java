@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
  * 生成器服务
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 public interface GeneratorService extends IService<Generator> {
 

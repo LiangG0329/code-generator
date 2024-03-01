@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * 生成器服务实现
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @Service
 @Slf4j
@@ -56,7 +56,7 @@ public class GeneratorServiceImpl extends ServiceImpl<GeneratorMapper, Generator
 
         // 创建时，参数不能为空
         if (add) {
-            ThrowUtils.throwIf(StringUtils.isAnyBlank(name, description), ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(StringUtils.isAnyBlank(name, description), ErrorCode.PARAMS_ERROR, "名称和描述不能为空");
         }
         // 有参数则校验
         if (StringUtils.isNotBlank(name) && name.length() > 40) {
@@ -100,7 +100,7 @@ public class GeneratorServiceImpl extends ServiceImpl<GeneratorMapper, Generator
         String sortOrder = generatorQueryRequest.getSortOrder();
 
         // 拼接查询条件
-        // 模糊查询
+        // 模糊查询 条件：名称、描述、作者
         if (StringUtils.isNotBlank(searchText)) {
             queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText).or().like("author", searchText));
         }

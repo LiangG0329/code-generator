@@ -4,7 +4,7 @@ package com.code.web.common;
  * 自定义错误码
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 public enum ErrorCode {
 

@@ -18,7 +18,7 @@ import java.util.UUID;
  * 请求响应日志 AOP
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  **/
 @Aspect
 @Component
@@ -28,7 +28,7 @@ public class LogInterceptor {
     /**
      * 执行拦截
      */
-    @Around("execution(* com.yupi.web.controller.*.*(..))")
+    @Around("execution(* com.code.web.controller.*.*(..))")
     public Object doInterceptor(ProceedingJoinPoint point) throws Throwable {
         // 计时
         StopWatch stopWatch = new StopWatch();

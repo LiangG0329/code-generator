@@ -30,7 +30,7 @@ import static com.code.web.service.impl.UserServiceImpl.SALT;
  * 用户接口
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @RestController
 @RequestMapping("/user")
@@ -159,7 +159,7 @@ public class UserController {
     }
 
     /**
-     * 更新用户
+     * 更新用户 管理员
      *
      * @param userUpdateRequest
      * @param request
@@ -174,6 +174,26 @@ public class UserController {
         }
         User user = new User();
         BeanUtils.copyProperties(userUpdateRequest, user);
+        boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 更新用户 所有用户
+     *
+     * @param userEditRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/edit")
+    public BaseResponse<Boolean> editUser(@RequestBody UserEditRequest userEditRequest,
+                                            HttpServletRequest request) {
+        if (userEditRequest == null || userEditRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(userEditRequest, user);
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);

@@ -150,6 +150,21 @@ export async function updateUserUsingPost(
   });
 }
 
+/** editUser POST /api/user/edit */
+export async function editUserUsingPost(
+  body: API.UserEditRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseBoolean_>('/api/user/edit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** updateMyUser POST /api/user/update/my */
 export async function updateMyUserUsingPost(
   body: API.UserUpdateMyRequest,

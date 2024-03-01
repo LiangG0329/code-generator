@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * Spring 上下文获取工具
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  */
 @Component
 public class SpringContextUtils implements ApplicationContextAware {

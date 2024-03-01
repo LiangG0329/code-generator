@@ -5,6 +5,8 @@ import cn.hutool.core.io.FileUtil;
 import java.io.*;
 
 /**
+ * git 代码托管,执行git init
+ *
  * @author Liang
  * @create 2024/2/19
  */

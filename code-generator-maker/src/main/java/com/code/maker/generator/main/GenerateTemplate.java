@@ -1,8 +1,10 @@
-package com.code.maker.generator;
+package com.code.maker.generator.main;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
+import com.code.maker.generator.GitInit;
 import com.code.maker.generator.file.DynamicFileGenerator;
 import com.code.maker.meta.Meta;
 import com.code.maker.meta.MetaManager;
@@ -13,12 +15,14 @@ import java.io.IOException;
 
 /**
  * 核心生成器模板,抽象类,可根据需要重写方法,定制代码生成器
+ *
  * @author Liang
  * @create 2024/2/20
  */
 public abstract class GenerateTemplate {
     /**
      * 执行制作代码生成器流程
+     *
      * @throws TemplateException
      * @throws IOException
      * @throws InterruptedException
@@ -68,6 +72,7 @@ public abstract class GenerateTemplate {
 
     /**
      * 代码生成
+     *
      * @param meta 元信息对象
      * @param outputPath 输出生成根路径
      * @throws IOException
@@ -144,6 +149,7 @@ public abstract class GenerateTemplate {
 
     /**
      * 构建 jar 包
+     *
      * @param meta 元信息对象
      * @param outputPath 输出生成根路径
      * @return 返回 jar 包的相对路径
@@ -159,6 +165,7 @@ public abstract class GenerateTemplate {
 
     /**
      * 封装脚本
+     *
      * @param jarPath 构建的 jar 包相对路径
      * @param outputPath 输出输出路径
      * @return 生成的可执行脚本的路径
@@ -170,13 +177,14 @@ public abstract class GenerateTemplate {
     }
 
     /**
-     * 生成精简版代码生成器的方法
+     * 生成精简版代码生成器
+     *
      * @param outputPath 输出生成根路径
      * @param sourceCopyPath 复制生成文件的绝对路径
      * @param jarPath jar包相对路径
      * @param shellOutputPath 封装脚本的绝对路径
      */
-    protected void buildDist(String outputPath, String sourceCopyPath, String jarPath, String shellOutputPath) {
+    protected String buildDist(String outputPath, String sourceCopyPath, String jarPath, String shellOutputPath) {
         String distOutputPath = outputPath + "-dist";
         // - 拷贝jar包
         String targetAbsolutePath = distOutputPath + File.separator + "target";
@@ -188,10 +196,25 @@ public abstract class GenerateTemplate {
         FileUtil.copy(shellOutputPath + ".bat", distOutputPath, true);
         // - 拷贝源模板文件
         FileUtil.copy(sourceCopyPath, distOutputPath, true);
+
+        return distOutputPath;
     }
 
     /**
-     *  git init Git托管初始化
+     * 制作zip压缩包
+     *
+     * @param filePath 需制作zip压缩包的文件路径
+     * @return zip压缩包路径
+     */
+    protected String buildZip(String filePath) {
+        String zipPath = filePath +".zip";
+        ZipUtil.zip(filePath, zipPath);
+        return zipPath;
+    }
+
+    /**
+     *  Git代码托管初始化
+     *
      * @param projectPath 项目根路径
      * @param outputPath 输出生成根路径
      * @throws IOException

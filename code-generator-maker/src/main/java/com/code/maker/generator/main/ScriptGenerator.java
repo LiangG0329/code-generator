@@ -1,4 +1,4 @@
-package com.code.maker.generator;
+package com.code.maker.generator.main;
 
 import cn.hutool.core.io.FileUtil;
 

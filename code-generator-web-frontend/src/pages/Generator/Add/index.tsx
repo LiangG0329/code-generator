@@ -150,8 +150,8 @@ const GeneratorAddPage: React.FC = () => {
               return true;
             }}
           >
-            <ProFormText name="name" label="名称" placeholder="请输入名称" />
-            <ProFormTextArea name="description" label="描述" placeholder="请输入描述" />
+            <ProFormText name="name" label="名称" placeholder="请输入名称" rules={[{ required: true, message: '请填写名称' }]}/>
+            <ProFormTextArea name="description" label="描述" placeholder="请输入描述" rules={[{ required: true, message: '请填写描述' }]}/>
             <ProFormText name="basePackage" label="基础包" placeholder="请输入基础包" />
             <ProFormText name="version" label="版本" placeholder="请输入版本" />
             <ProFormText name="author" label="作者" placeholder="请输入作者" />
@@ -160,6 +160,7 @@ const GeneratorAddPage: React.FC = () => {
               <PictureUploader biz="generator_picture" />
             </ProFormItem>
           </StepsForm.StepForm>
+
           <StepsForm.StepForm
             name="modelConfig"
             title="模型配置"
@@ -170,6 +171,7 @@ const GeneratorAddPage: React.FC = () => {
           >
             <ModelConfigForm formRef={formRef} oldData={oldData} />
           </StepsForm.StepForm>
+
           <StepsForm.StepForm
             name="fileConfig"
             title="文件配置"
@@ -180,6 +182,7 @@ const GeneratorAddPage: React.FC = () => {
           >
             <FileConfigForm formRef={formRef} oldData={oldData} />
           </StepsForm.StepForm>
+
           <StepsForm.StepForm name="dist" title="生成器文件">
             <ProFormItem label="产物包" name="distPath">
               <FileUploader biz="generator_dist" description="请上传生成器文件压缩包" />

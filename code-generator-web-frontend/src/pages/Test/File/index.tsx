@@ -1,4 +1,5 @@
 import {COS_HOST} from '@/constants';
+// @ts-ignore
 import {testDownloadFileUsingGet, testUploadFileUsingPost,} from '@/services/backend/fileController';
 import {InboxOutlined} from '@ant-design/icons';
 import {Button, Card, Divider, Flex, message, Upload, UploadProps} from 'antd';
@@ -48,9 +49,9 @@ const TestFilePage: React.FC = () => {
         </Dragger>
       </Card>
       <Card title="文件下载" loading={!value}>
-        <div>文件地址：{COS_HOST + value}</div>
+        <div>文件地址：{ value}</div>
         <Divider />
-        <img src={COS_HOST + value} height={280} />
+        <img src={value} height={280} />
         <Divider />
         <Button
           onClick={async () => {

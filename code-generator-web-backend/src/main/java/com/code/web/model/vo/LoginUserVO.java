@@ -9,7 +9,7 @@ import java.util.Date;
  * 已登录用户视图（脱敏）
  *
  * @author Liang
- * @from <a href="https://github.com/LiangG0329/code-generator">代码生成</a>
+ * @from <a href="https://github.com/LiangG0329/code-generator">代码工坊</a>
  **/
 @Data
 public class LoginUserVO implements Serializable {
