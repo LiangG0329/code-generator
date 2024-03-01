@@ -76,6 +76,11 @@ public class Generator implements Serializable {
     /**
      * 创建用户 id
      */
+    private Long downloadCount;
+
+    /**
+     * 创建用户 id
+     */
     private Long userId;
 
     /**

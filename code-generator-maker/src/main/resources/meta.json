@@ -65,7 +65,7 @@
             "fieldName": "author",
             "type": "String",
             "description": "作者注释",
-            "defaultValue": "Liang",
+            "defaultValue": "author",
             "abbr": "a"
           },
           {

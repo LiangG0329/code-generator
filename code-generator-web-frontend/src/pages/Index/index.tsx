@@ -110,7 +110,25 @@ const IndexPage: React.FC = () => {
                         label: '推荐',
                     },
                 ]}
-                onChange={() => {
+                onChange={(activeKey) => {
+                    switch (activeKey) {
+                        case 'newest':
+                            setSearchParams({
+                                ...DEFAULT_PAGE_PARAMS,
+                                ...searchParams,
+                                sortField:'updateTime'
+                            });
+                            break;
+                        case 'recommend':
+                            setSearchParams({
+                                ...DEFAULT_PAGE_PARAMS,
+                                ...searchParams,
+                                sortField:'downloadCount'
+                            });
+                            break;
+                        default:
+                            break;
+                    }
                 }}
             />
 
@@ -123,6 +141,7 @@ const IndexPage: React.FC = () => {
                 onFinish={async (values: API.GeneratorQueryRequest) => {
                     setSearchParams({
                         ...DEFAULT_PAGE_PARAMS,
+                        ...searchParams,
                         // @ts-ignore
                         ...values,
                         searchText: searchParams.searchText,

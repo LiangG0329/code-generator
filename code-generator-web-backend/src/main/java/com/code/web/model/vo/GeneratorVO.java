@@ -80,6 +80,11 @@ public class GeneratorVO implements Serializable {
     private Integer status;
 
     /**
+     * 下载次数
+     */
+    private Long downloadCount;
+
+    /**
      * 创建用户 id
      */
     private Long userId;

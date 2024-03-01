@@ -54,6 +54,7 @@ const UserAdminPage: React.FC = () => {
       dataIndex: 'id',
       valueType: 'text',
       hideInForm: true,
+      ellipsis: true
     },
     {
       title: '账号',
@@ -70,14 +71,16 @@ const UserAdminPage: React.FC = () => {
       dataIndex: 'userAvatar',
       valueType: 'image',
       fieldProps: {
-        width: 64,
+        width: 65,
       },
       hideInSearch: true,
+      ellipsis: true
     },
     {
       title: '简介',
       dataIndex: 'userProfile',
       valueType: 'textarea',
+      ellipsis: true
     },
     {
       title: '权限',

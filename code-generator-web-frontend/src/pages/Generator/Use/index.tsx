@@ -1,6 +1,6 @@
 import {getGeneratorVoByIdUsingGet, useGeneratorUsingPost} from '@/services/backend/generatorController';
 import {Link, useModel, useParams} from '@@/exports';
-import {DownloadOutlined} from '@ant-design/icons';
+import {FileZipOutlined} from '@ant-design/icons';
 import {PageContainer} from '@ant-design/pro-components';
 import {Button, Card, Col, Collapse, Form, Image, Input, message, Row, Space, Tag, Typography,} from 'antd';
 import {saveAs} from 'file-saver';
@@ -65,12 +65,12 @@ const GeneratorUsePage: React.FC = () => {
   };
 
   /**
-   * 下载按钮
+   * 使用按钮
    */
-  const downloadButton = data.distPath && currentUser && (
+  const useButton = data.distPath && currentUser && (
     <Button
       type="primary"
-      icon={<DownloadOutlined />}
+      icon={<FileZipOutlined />}
       loading={downloading}
       onClick={async () => {
         setDownloading(true);
@@ -153,7 +153,7 @@ const GeneratorUsePage: React.FC = () => {
               })}
             </Form>
             <Space size="middle">
-              {downloadButton}
+              {useButton}
               <Link to={`/generator/detail/${id}`}>
                 <Button>查看详情</Button>
               </Link>

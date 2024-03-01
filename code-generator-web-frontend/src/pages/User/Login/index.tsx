@@ -65,7 +65,11 @@ const Login: React.FC = () => {
             minWidth: 280,
             maxWidth: '75vw',
           }}
-          logo={<img alt="logo" style={{ height: '100%' }} src="/logo.png" />}
+          logo={
+            <Link to="/">
+                <img alt="logo" style={{ height: '100%' }} src="/logo.png" />
+            </Link>
+          }
           title="代码工坊"
           subTitle={'代码生成器在线制作共享平台，欢迎加入使用'}
           initialValues={{
@@ -118,15 +122,17 @@ const Login: React.FC = () => {
               />
             </>
           )}
-
-          <div
-            style={{
-              marginBottom: 24,
-              textAlign: 'right',
-            }}
-          >
-            <Link to="/user/register">新用户注册</Link>
-          </div>
+            <div
+                style={{
+                    marginBottom: 24,
+                    textAlign: 'right',
+                    display: 'flex',
+                    justifyContent: 'space-between',// 在子元素之间平均分配空间
+                }}
+            >
+                <Link to="/">首页</Link>
+                <Link to="/user/register">新用户注册</Link>
+            </div>
         </LoginForm>
       </div>
       <Footer />

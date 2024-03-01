@@ -9,7 +9,7 @@ import {
   editGeneratorUsingPost,
   getGeneratorVoByIdUsingGet,
 } from '@/services/backend/generatorController';
-import {useSearchParams} from '@@/exports';
+import {useModel, useSearchParams} from '@@/exports';
 import type {ProFormInstance} from '@ant-design/pro-components';
 import {ProCard, ProFormSelect, ProFormText, ProFormTextArea, StepsForm,} from '@ant-design/pro-components';
 import {ProFormItem} from '@ant-design/pro-form';
@@ -25,6 +25,8 @@ const GeneratorAddPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get('id');
   const [oldData, setOldData] = useState<API.GeneratorEditRequest>();
+  const { initialState, setInitialState } = useModel('@@initialState');
+  const { currentUser } = initialState || {};
   const formRef = useRef<ProFormInstance>();
   // 记录表单已填数据
   const [basicInfo, setBasicInfo] = useState<API.GeneratorEditRequest>();
@@ -45,6 +47,15 @@ const GeneratorAddPage: React.FC = () => {
 
       // 处理文件路径
       if (res.data) {
+        if (!currentUser) {
+          history.push("/");
+        }
+        if (currentUser) {
+          // 用户id 不匹配则返回首页
+          if (res.data.userId !== currentUser.id) {
+            history.push("/");
+          }
+        }
         const { distPath } = res.data ?? {};
         if (distPath) {
           // @ts-ignore

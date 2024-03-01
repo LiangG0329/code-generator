@@ -17,6 +17,7 @@
         <result property="modelConfig" column="modelConfig" jdbcType="VARCHAR"/>
         <result property="distPath" column="distPath" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="downloadCount" column="downloadCount" jdbcType="BIGINT"/>
         <result property="userId" column="userId" jdbcType="BIGINT"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>

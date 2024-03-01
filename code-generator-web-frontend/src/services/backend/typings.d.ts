@@ -109,6 +109,7 @@ declare namespace API {
     tags?: string;
     updateTime?: string;
     userId?: string;
+    downloadCount?: string;
     version?: string;
   };
 
@@ -194,6 +195,7 @@ declare namespace API {
     basePackage?: string;
     createTime?: string;
     description?: string;
+    downloadCount?: string;
     distPath?: string;
     fileConfig?: FileConfig;
     id?: string;

@@ -60,7 +60,9 @@ export const requestConfig: RequestConfig = {
       // }
 
       if (code !== 0) {
-        throw new Error(data.message ?? '服务器错误');
+          throw new Error('请先登录');
+          window.location.href = `/user/login`;
+        // throw new Error(data.message ?? '服务器错误');
       }
       return response;
     },

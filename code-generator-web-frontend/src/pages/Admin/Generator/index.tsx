@@ -7,6 +7,7 @@ import {ProTable} from '@ant-design/pro-components';
 import '@umijs/max';
 import {Button, message, Select, Space, Tag, Typography} from 'antd';
 import React, {useRef, useState} from 'react';
+import ShowModal from "@/pages/Admin/Generator/components/ShowModal";
 
 /**
  * 代码生成器管理页面
@@ -18,9 +19,13 @@ const GeneratorAdminPage: React.FC = () => {
   const [createModalVisible, setCreateModalVisible] = useState<boolean>(false);
   // 是否显示更新窗口
   const [updateModalVisible, setUpdateModalVisible] = useState<boolean>(false);
+  // 是否显示详情窗口
+  const [showModalVisible, setShowModalVisible] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
   // 当前代码生成器点击的数据
   const [currentRow, setCurrentRow] = useState<API.Generator>();
+  // 当前模型或文件配置
+  const [currentConfig, setCurrentConfig] = useState<string>("{}");
 
   /**
    * 删除节点
@@ -54,6 +59,7 @@ const GeneratorAdminPage: React.FC = () => {
       dataIndex: 'id',
       valueType: 'text',
       hideInForm: true,
+      ellipsis: true
     },
     {
       title: '名称',
@@ -64,6 +70,7 @@ const GeneratorAdminPage: React.FC = () => {
       title: '描述',
       dataIndex: 'description',
       valueType: 'textarea',
+      ellipsis: true
     },
     {
       title: '基础包',
@@ -79,6 +86,7 @@ const GeneratorAdminPage: React.FC = () => {
       title: '作者',
       dataIndex: 'author',
       valueType: 'text',
+      ellipsis: true
     },
     {
       title: '标签',
@@ -104,24 +112,48 @@ const GeneratorAdminPage: React.FC = () => {
       dataIndex: 'picture',
       valueType: 'image',
       fieldProps: {
-        width: 64,
+        width: 65,
       },
       hideInSearch: true,
+      ellipsis: true
     },
     {
       title: '文件配置',
       dataIndex: 'fileConfig',
       valueType: 'jsonCode',
+      render: (text, record) => {
+        // 直接返回一个链接，点击会打开模态框
+        return <a onClick={() => {
+          if (record.fileConfig) {
+            // @ts-ignore
+            setCurrentConfig(record.fileConfig);
+          }
+          setShowModalVisible(true);
+        }
+        }>详情</a>;
+      }
     },
     {
       title: '模型配置',
       dataIndex: 'modelConfig',
       valueType: 'jsonCode',
+      render: (text, record) => {
+        // 直接返回一个链接，点击会打开模态框
+        return <a onClick={() => {
+          if (record.fileConfig) {
+            // @ts-ignore
+            setCurrentConfig(record.modelConfig);
+          }
+          setShowModalVisible(true);
+        }
+        }>详情</a>;
+      }
     },
     {
       title: '产物包路径',
       dataIndex: 'distPath',
       valueType: 'text',
+      ellipsis: true
     },
     {
       title: '状态',
@@ -136,6 +168,7 @@ const GeneratorAdminPage: React.FC = () => {
       title: '创建用户',
       dataIndex: 'userId',
       valueType: 'text',
+      ellipsis: true
     },
     {
       title: '创建时间',
@@ -174,6 +207,7 @@ const GeneratorAdminPage: React.FC = () => {
       ),
     },
   ];
+
 
   return (
     <div className="generator-admin-page">
@@ -240,6 +274,13 @@ const GeneratorAdminPage: React.FC = () => {
         onCancel={() => {
           setUpdateModalVisible(false);
         }}
+      />
+      <ShowModal
+          data={currentConfig}
+          visible={showModalVisible}
+          onCancel={() => {
+          setShowModalVisible(false);
+         }}
       />
     </div>
   );

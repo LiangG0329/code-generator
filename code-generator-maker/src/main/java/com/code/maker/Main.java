@@ -3,7 +3,6 @@ package com.code.maker;
 //import com.code.maker.cli.CommandExecutor;
 
 import com.code.maker.generator.main.GenerateTemplate;
-import com.code.maker.generator.main.MainGenerator;
 import com.code.maker.generator.main.ZipGenerator;
 import freemarker.template.TemplateException;
 

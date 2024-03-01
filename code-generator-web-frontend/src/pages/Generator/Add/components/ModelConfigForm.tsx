@@ -88,7 +88,7 @@ export default (props: Props) => {
 
                 {/* 组内字段 */}
                 {groupKey && (
-                  <Form.Item label="组内字段">
+                  <Form.Item label="组内字段" labelCol={{ style: {fontWeight: 'bold'}}}>
                     <Form.List name={[field.name, 'models']}>
                       {(subFields, subOpt) => (
                         <div style={{ display: 'flex', flexDirection: 'column', rowGap: 16 }}>

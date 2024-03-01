@@ -1,42 +1,51 @@
-import {GithubOutlined} from '@ant-design/icons';
+import {AntDesignOutlined, FireFilled, GithubOutlined} from '@ant-design/icons';
 import {DefaultFooter} from '@ant-design/pro-components';
 import '@umijs/max';
 import React from 'react';
 
 const Footer: React.FC = () => {
-  const defaultMessage = '程序员鱼皮';
+  const defaultMessage = 'Liang Guo';
   const currentYear = new Date().getFullYear();
   return (
     <DefaultFooter
       style={{
         background: 'none',
       }}
-      copyright={`${currentYear} ${defaultMessage}`}
+      copyright={`Copyright ${currentYear} | Powered by ${defaultMessage}`}
       links={[
         {
-          key: 'codeNav',
-          title: '编程导航',
-          href: 'https://yupi.icu',
-          blankTarget: true,
-        },
-        {
-          key: 'Ant Design',
-          title: '编程宝典',
-          href: 'https://codefather.cn',
+          key: 'author',
+          title: (
+              <>
+                <FireFilled /> Liang Guo
+              </>
+          ),
+          href: 'https://github.com/LiangG0329',
           blankTarget: true,
         },
         {
           key: 'github',
           title: (
             <>
-              <GithubOutlined /> 鱼皮源码
+              <GithubOutlined /> 源码
             </>
           ),
-          href: 'https://github.com/liyupi',
+          href: 'https://github.com/LiangG0329/code-generator',
           blankTarget: true,
         },
+          {
+              key: 'Ant Design',
+              title: (
+                  <>
+                  <AntDesignOutlined />Ant Design
+                  </>
+              ),
+              href: 'https://ant.design',
+              blankTarget: true,
+          },
       ]}
-    />
+    ></DefaultFooter>
   );
 };
+
 export default Footer;
