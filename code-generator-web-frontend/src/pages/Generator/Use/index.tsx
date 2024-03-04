@@ -75,7 +75,7 @@ const GeneratorUsePage: React.FC = () => {
       onClick={async () => {
         setDownloading(true);
         const values = form.getFieldsValue();
-
+        // console.log(values);
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const blob = await useGeneratorUsingPost(
           {

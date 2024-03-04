@@ -1,5 +1,6 @@
 import {CloseOutlined} from '@ant-design/icons';
 import {Button, Card, Form, FormListFieldData, Input, Space} from 'antd';
+import React, {useState} from "react";
 
 interface Props {
   formRef: any;
@@ -8,7 +9,9 @@ interface Props {
 
 export default (props: Props) => {
   const { formRef, oldData } = props;
+  const [type, setType] = useState('');
 
+  // @ts-ignore
   /**
    * 单个表单字段填写视图
    * @param field
@@ -28,7 +31,17 @@ export default (props: Props) => {
       <Form.Item label="类型" name={[field.name, 'type']}>
         <Input />
       </Form.Item>
-      <Form.Item label="默认值" name={[field.name, 'defaultValue']}>
+      <Form.Item label="默认值" name={[field.name, 'defaultValue']}
+         // rules={[
+         //   {
+         //     transform(value) {
+         //       if (value === 'true') return true;
+         //       if (value === 'false') return false;
+         //       return value;
+         //     },
+         //   },
+         // ]}
+      >
         <Input />
       </Form.Item>
       <Form.Item label="缩写" name={[field.name, 'abbr']}>
@@ -75,6 +88,9 @@ export default (props: Props) => {
                         <Input />
                       </Form.Item>
                       <Form.Item label="类型" name={[field.name, 'type']}>
+                        <Input />
+                      </Form.Item>
+                      <Form.Item label="描述" name={[field.name, 'description']}>
                         <Input />
                       </Form.Item>
                       <Form.Item label="条件" name={[field.name, 'condition']}>

@@ -19,13 +19,13 @@ generator <命令> <选项参数>
 示例命令：
 
 ```
-generator generate<#list modelConfig.models as modelInfo><#if modelInfo.fieldName??> --${modelInfo.fieldName}<#if modelInfo.abbr??>|-${modelInfo.abbr}</#if></#if></#list>  # 代码生成
+generator generate<#if modelConfig?has_content && modelConfig.models?has_content><#list modelConfig.models as modelInfo><#if modelInfo.fieldName??> --${modelInfo.fieldName}<#if modelInfo.abbr??>|-${modelInfo.abbr}</#if></#if></#list></#if>  # 代码生成
 generator config  # 输出动态参数的信息
 generator list  # 输出子文件列表
 ```
 
 ## 参数说明
-
+<#if modelConfig?has_content && modelConfig.models?has_content>
 <#list modelConfig.models as modelInfo>
 <#-- 命令选项 -->
 <#if modelInfo.fieldName??>
@@ -51,3 +51,4 @@ ${modelInfo?index + 1}) ${modelInfo.fieldName}
 </#if>
 
 </#list>
+</#if>

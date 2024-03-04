@@ -109,7 +109,6 @@ declare namespace API {
     tags?: string;
     updateTime?: string;
     userId?: string;
-    downloadCount?: string;
     version?: string;
   };
 
@@ -195,7 +194,6 @@ declare namespace API {
     basePackage?: string;
     createTime?: string;
     description?: string;
-    downloadCount?: string;
     distPath?: string;
     fileConfig?: FileConfig;
     id?: string;
@@ -203,6 +201,7 @@ declare namespace API {
     name?: string;
     picture?: string;
     status?: number;
+    downloadCount?: string;
     tags?: string[];
     updateTime?: string;
     user?: UserVO;
@@ -349,6 +348,13 @@ declare namespace API {
     userRole?: string;
   };
 
+  type UserEditRequest = {
+    id?: string;
+    userAvatar?: string;
+    userName?: string;
+    userProfile?: string;
+  };
+
   type UserLoginRequest = {
     userAccount?: string;
     userPassword?: string;
@@ -383,13 +389,6 @@ declare namespace API {
     userName?: string;
     userProfile?: string;
     userRole?: string;
-  };
-
-  type UserEditRequest = {
-    id?: string;
-    userAvatar?: string;
-    userName?: string;
-    userProfile?: string;
   };
 
   type UserVO = {

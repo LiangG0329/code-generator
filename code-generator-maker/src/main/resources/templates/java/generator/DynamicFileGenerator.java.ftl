@@ -34,7 +34,7 @@ public class DynamicFileGenerator {
 
         // 指定模板文件所在的路径
         File templateDir = new File(inputPath).getParentFile();
-        System.out.println("templateDir = " + templateDir);
+        // System.out.println("templateDir = " + templateDir);
         configuration.setDirectoryForTemplateLoading(templateDir);
 
         // 设置模板文件使用的字符集,数字格式

@@ -34,7 +34,9 @@ public class TemplateMaker {
         Meta meta = templateMakerConfig.getMeta();
         String originProjectPath = templateMakerConfig.getOriginProjectPath();
         TemplateMakerFileConfig templateMakerFileConfig = templateMakerConfig.getFileConfig();
+        System.out.println("templateMakerFileConfig = " + templateMakerFileConfig);
         TemplateMakerModelConfig templateMakerModelConfig = templateMakerConfig.getModelConfig();
+        System.out.println("templateMakerModelConfig = " + templateMakerModelConfig);
         TemplateMakerOutputConfig templateMakerConfigOutputConfig = templateMakerConfig.getOutputConfig();
         Long id = templateMakerConfig.getId();
      

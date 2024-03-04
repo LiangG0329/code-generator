@@ -32,6 +32,7 @@ ${indent}${modelInfo.groupKey}CommandLine.execute(${modelInfo.allArgsStr});
 @Data
 @CommandLine.Command(name = "generate", description = "代码生成", mixinStandardHelpOptions = true)
 public class GenerateCommand implements Callable<Integer> {
+<#if modelConfig?has_content && modelConfig.models?has_content>
 <#list modelConfig.models as modelInfo>
     <#-- group model 分组命令 -->
     <#if modelInfo.groupKey??>
@@ -62,10 +63,12 @@ public class GenerateCommand implements Callable<Integer> {
     <@generateOption indent="    " modelInfo=modelInfo />
     </#if>
 </#list>
+</#if>
 
     <#-- 生成调用方法 -->
     @Override
     public Integer call() throws Exception {
+       <#if modelConfig?has_content && modelConfig.models?has_content>
         <#list modelConfig.models as modelInfo>
         <#if modelInfo.groupKey??>
         <#if modelInfo.condition??>
@@ -77,14 +80,17 @@ public class GenerateCommand implements Callable<Integer> {
         </#if>
         </#if>
         </#list>
+       </#if>
         <#-- 填充数据模型对象 -->
         DataModel dataModel = new DataModel();  // 数据模型
         BeanUtil.copyProperties(this, dataModel);
+        <#if modelConfig?has_content && modelConfig.models?has_content>
         <#list modelConfig.models as modelInfo>
         <#if modelInfo.groupKey??>
         dataModel.set${modelInfo.type}(${modelInfo.groupKey});
         </#if>
         </#list>
+        </#if>
         System.out.println("配置信息: " + dataModel);
         // 执行代码生成方法
         FileGenerator.doGenerate(dataModel);

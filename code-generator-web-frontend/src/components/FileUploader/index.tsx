@@ -39,6 +39,7 @@ const FileUploader: React.FC<Props> = (props) => {
           {},
           fileObj.file,
         );
+        // console.log(res.data);
         fileObj.onSuccess(res.data);
       } catch (e: any) {
         message.error('上传失败，' + e.message);

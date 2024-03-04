@@ -160,7 +160,16 @@ const GeneratorAdminPage: React.FC = () => {
       dataIndex: 'status',
       valueEnum: {
         0: {
-          text: '默认',
+          text: '待审核',
+          color: 'yellow',
+        },
+        1: {
+          text: '已通过',
+          color: 'green',
+        },
+        2: {
+          text: '未通过',
+          color: 'red',
         },
       },
     },

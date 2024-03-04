@@ -9,11 +9,11 @@ import {
   editGeneratorUsingPost,
   getGeneratorVoByIdUsingGet,
 } from '@/services/backend/generatorController';
-import {useModel, useSearchParams} from '@@/exports';
+import {useSearchParams} from '@@/exports';
 import type {ProFormInstance} from '@ant-design/pro-components';
 import {ProCard, ProFormSelect, ProFormText, ProFormTextArea, StepsForm,} from '@ant-design/pro-components';
 import {ProFormItem} from '@ant-design/pro-form';
-import {history} from '@umijs/max';
+import {history, useModel} from '@umijs/max';
 import {message, UploadFile} from 'antd';
 import React, {useEffect, useRef, useState} from 'react';
 
@@ -142,6 +142,7 @@ const GeneratorAddPage: React.FC = () => {
     }
   };
 
+  // @ts-ignore
   return (
     <ProCard>
       {/* 创建或者已加载要更新的数据时，才渲染表单，顺利填充默认值 */}

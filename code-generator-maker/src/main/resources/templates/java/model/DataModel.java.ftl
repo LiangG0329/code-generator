@@ -20,6 +20,7 @@ ${indent}private ${modelInfo.type} ${modelInfo.fieldName}<#if modelInfo.defaultV
  */
 @Data
 public class DataModel {
+<#if modelConfig?has_content && modelConfig.models?has_content>
 <#list modelConfig.models as modelInfo>
     <#-- 分组 -->
     <#if modelInfo.groupKey??>
@@ -44,4 +45,5 @@ public class DataModel {
     <@generateModel indent="    " modelInfo=modelInfo />
     </#if>
 </#list>
+</#if>
 }

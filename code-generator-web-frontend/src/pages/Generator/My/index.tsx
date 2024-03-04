@@ -1,20 +1,27 @@
-import {listGeneratorVoByPageFastUsingPost} from '@/services/backend/generatorController';
-import {CheckCircleTwoTone, FireTwoTone, UserOutlined} from '@ant-design/icons';
+import {listMyGeneratorVoByPageUsingPost} from '@/services/backend/generatorController';
+import {
+  CheckCircleTwoTone,
+  ClockCircleTwoTone,
+  ExclamationCircleTwoTone,
+  FireTwoTone,
+  UserOutlined
+} from '@ant-design/icons';
 import {PageContainer, ProFormSelect, ProFormText, QueryFilter} from '@ant-design/pro-components';
 import {Avatar, Card, Flex, Image, Input, List, message, Tabs, Tag, Typography} from 'antd';
 import moment from 'moment';
 import React, {useEffect, useState} from 'react';
-// @ts-ignore
-import {Link} from 'umi';
+
 import {FALLBACK_IMAGE_URL} from "@/constants";
+import {Link} from "umi";
+
 
 /**
  * 默认分页参数
  */
 const DEFAULT_PAGE_PARAMS: PageRequest = {
     current: 1,
-    pageSize: 12,
-    sortField: 'updateTime',
+    pageSize: 4,
+    sortField: 'createTime',
     sortOrder: 'descend',
 };
 
@@ -28,7 +35,7 @@ const IndexPage: React.FC = () => {
     const [total, setTotal] = useState<number>(0);
     // 搜索条件
     const [searchParams, setSearchParams] = useState<API.GeneratorQueryRequest>({
-        ...DEFAULT_PAGE_PARAMS, status: 1
+        ...DEFAULT_PAGE_PARAMS,
     });
 
     /**
@@ -37,7 +44,7 @@ const IndexPage: React.FC = () => {
     const doSearch = async () => {
         setLoading(true);
         try {
-            const res = await listGeneratorVoByPageFastUsingPost(searchParams);
+            const res = await listMyGeneratorVoByPageUsingPost(searchParams);
             setDataList(res.data?.records ?? []);
             setTotal(Number(res.data?.total) ?? 0);
         } catch (error: any) {
@@ -79,7 +86,7 @@ const IndexPage: React.FC = () => {
                         width: '40vw',
                         minWidth: 320,
                     }}
-                    placeholder="搜索代码生成器"
+                    placeholder="搜索我的生成器"
                     allowClear
                     enterButton="搜索"
                     size="large"
@@ -104,11 +111,11 @@ const IndexPage: React.FC = () => {
                 items={[
                     {
                         key: 'newest',
-                        label: '最新',
+                        label: '最近更新',
                     },
                     {
                         key: 'recommend',
-                        label: '推荐',
+                        label: '最多下载',
                     },
                 ]}
                 onChange={(activeKey) => {
@@ -187,8 +194,8 @@ const IndexPage: React.FC = () => {
                         <Link to={`/generator/detail/${data.id}`}>
                             <Card hoverable
                                   cover={<Image alt={data.name} src={data.picture} fallback={FALLBACK_IMAGE_URL}
-                                                style={{height: '200px', objectFit: 'cover'}}/>}
-                                  style={{height: '400px'}}>
+                                                style={{height: 200, objectFit: 'cover'}}/>}
+                                  style={{height: '420px'}}>
                                 <Card.Meta
                                     title={<a>{data.name}</a>}
                                     description={
@@ -197,6 +204,20 @@ const IndexPage: React.FC = () => {
                                         </Typography.Paragraph>
                                     }
                                 />
+                                <div style={{marginBottom: 5}}>
+                                  {(() => {
+                                    switch (data.status) {
+                                      case 0:
+                                        return  <span style={{ color: 'orange' }}><ClockCircleTwoTone twoToneColor="#FFA500" /> 审核中</span>;
+                                      case 1:
+                                        return <span style={{ color: 'green' }}><CheckCircleTwoTone twoToneColor="#52c41a"/> 已发布</span>;
+                                      case 2:
+                                        return <span style={{ color: 'red' }}><ExclamationCircleTwoTone twoToneColor="#FF0000"/> 审核未通过</span>;
+                                      default:
+                                        return <span>未知状态</span>;
+                                    }
+                                  })()}
+                                </div>
                                 <div style={{minHeight: '30px'}}>
                                     {tagListView(data.tags)}
                                 </div>
@@ -204,10 +225,10 @@ const IndexPage: React.FC = () => {
                                     <Typography.Text type="secondary" style={{fontSize: 12}}>
                                         {moment(data.updateTime).fromNow()}
                                     </Typography.Text>
-                                     <Typography.Text type="secondary" style={{fontSize: 12}}>
-                                       {data.downloadCount && parseInt(data.downloadCount) > 5 && <FireTwoTone twoToneColor="#FF0000" />}
-                                         下载次数：{data.downloadCount}
-                                    </Typography.Text>
+                                  <Typography.Text type="secondary" style={{fontSize: 12}}>
+                                    {data.downloadCount && parseInt(data.downloadCount) > 5 && <FireTwoTone twoToneColor="#FF0000" />}
+                                    下载次数：{data.downloadCount}
+                                  </Typography.Text>
                                     <div>
                                         <Avatar src={data.user?.userAvatar ?? <UserOutlined/>}/>
                                     </div>

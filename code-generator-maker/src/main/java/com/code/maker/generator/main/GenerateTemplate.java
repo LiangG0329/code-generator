@@ -20,8 +20,9 @@ import java.io.IOException;
  * @create 2024/2/20
  */
 public abstract class GenerateTemplate {
+
     /**
-     * 执行制作代码生成器流程
+     * 执行制作代码生成器
      *
      * @throws TemplateException
      * @throws IOException
@@ -29,15 +30,30 @@ public abstract class GenerateTemplate {
      */
     public void doGenerate() throws TemplateException, IOException, InterruptedException {
         Meta meta = MetaManager.getMeta();
-        System.out.println("meta = " + meta);
+        // System.out.println("meta = " + meta);
 
         // 输出根路径
         String projectPath = System.getProperty("user.dir");
         String outputPath = projectPath + File.separator + "generated" + File.separator + meta.getName();
+
+        doGenerate(meta, outputPath);
+    }
+
+    /**
+     * 执行制作代码生成器流程
+     *
+     * @param meta  meta 信息
+     * @param outputPath  输出路径
+     * @throws TemplateException
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public void doGenerate(Meta meta, String outputPath) throws TemplateException, IOException, InterruptedException {
+
         if (!FileUtil.exist(outputPath)) {
             FileUtil.mkdir(outputPath);
         }
-
+        System.out.println("meta = " + meta);
         // 1.复制原始文件到生成代码包 (后续使用相对路径生成代码，提高可移植性)
         String sourceCopyPath = copySource(meta, outputPath);
 
@@ -80,8 +96,9 @@ public abstract class GenerateTemplate {
      */
     protected void generateCode(Meta meta, String outputPath) throws IOException, TemplateException {
         // 读取 resources 目录
-        ClassPathResource classPathResource = new ClassPathResource("");
-        String inputResourcePath = classPathResource.getAbsolutePath();
+        // ClassPathResource classPathResource = new ClassPathResource("");
+        // String inputResourcePath = classPathResource.getAbsolutePath();
+        String inputResourcePath = "";
 
         // Java 包基础路径
         String outputBasePackage = meta.getBasePackage();
@@ -201,6 +218,9 @@ public abstract class GenerateTemplate {
         FileUtil.copy(shellOutputPath + ".bat", distOutputPath, true);
         // - 拷贝源模板文件
         FileUtil.copy(sourceCopyPath, distOutputPath, true);
+        // - 拷贝README
+        String readAbsolutePath = outputPath + File.separator + "README.md";
+        FileUtil.copy(readAbsolutePath, distOutputPath, true);
 
         return distOutputPath;
     }

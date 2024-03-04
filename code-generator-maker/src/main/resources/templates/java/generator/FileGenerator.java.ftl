@@ -34,6 +34,7 @@ public class FileGenerator {
         String inputPath;
         String outputPath;
     <#-- 获取model变量 -->
+    <#if modelConfig?has_content && modelConfig.models?has_content>
     <#list modelConfig.models as modelInfo>
         <#-- 分组model -->
         <#if modelInfo.groupKey??>
@@ -44,7 +45,8 @@ public class FileGenerator {
         ${modelInfo.type} ${modelInfo.fieldName} = model.get${modelInfo.fieldName? cap_first}();
         </#if>
     </#list>
-
+    </#if>
+    <#if fileConfig?has_content && fileConfig.files?has_content>
     <#list fileConfig.files as fileInfo>
         <#if fileInfo.groupKey??>
 
@@ -71,5 +73,6 @@ public class FileGenerator {
         </#if>
         </#if>
     </#list>
+    </#if>
     }
 }

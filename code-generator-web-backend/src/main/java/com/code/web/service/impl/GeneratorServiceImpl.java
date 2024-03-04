@@ -119,7 +119,6 @@ public class GeneratorServiceImpl extends ServiceImpl<GeneratorMapper, Generator
         queryWrapper.eq(StringUtils.isNotBlank(author), "author", author);
         queryWrapper.eq(StringUtils.isNotBlank(distPath), "distPath", distPath);
         queryWrapper.eq(ObjectUtils.isNotEmpty(status), "status", status);
-        queryWrapper.eq(ObjectUtils.isNotEmpty(status), "status", status);
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
 

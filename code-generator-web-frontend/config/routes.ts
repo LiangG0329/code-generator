@@ -57,6 +57,12 @@ export default [
     hideInMenu: true,
   },
   {
+    path: '/generator/my',
+    icon: 'book',
+    component: './Generator/My',
+    name: '我的生成器',
+  },
+  {
     path: '/admin',
     icon: 'crown',
     name: "管理页",

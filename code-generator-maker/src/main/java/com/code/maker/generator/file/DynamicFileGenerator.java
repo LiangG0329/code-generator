@@ -2,6 +2,7 @@ package com.code.maker.generator.file;
 
 import cn.hutool.core.io.FileUtil;
 import com.code.maker.model.DataModel;
+import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -20,33 +21,65 @@ import java.nio.file.Paths;
  * @create 2024/2/13
  */
 public class DynamicFileGenerator {
-    /** 测试动态生成 */
-    public static void main(String[] args) throws IOException, TemplateException {
-        // 指定模板文件所在的路径
-        String projectPath = System.getProperty("user.dir") + File.separator + "code-generator-maker";
-        String inputPath = projectPath + File.separator + "src/main/resources/templates/MainTemplate.java.ftl";
-        String outputPath = projectPath + File.separator + "output/MainTemplate.java";
-        DataModel dataModel = new DataModel();
-//        dataModel.setAuthor("liang");
-//        dataModel.setOutputText("out:");
-        doGenerate(inputPath, outputPath, dataModel);
-    }
 
     /**
      * 生成文件
+     * @param relativeInputPath  模板文件相对输入路径
+     * @param outputPath  生成文件输出路径
+     * @param model  数据模型
+     * @throws IOException
+     * @throws TemplateException
+     */
+    public static void doGenerate(String relativeInputPath, String outputPath, Object model) throws IOException, TemplateException {
+        // 创建Configuration 对象，参数为 FreeMarker 版本号
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_32);
+
+        // 指定模板文件所属包和模版文件名称
+        int lastSplitIndex = relativeInputPath.lastIndexOf("/");
+        String basePackagePath = relativeInputPath.substring(0, lastSplitIndex);
+        String templateName = relativeInputPath.substring(lastSplitIndex + 1);
+
+        // 通过类加载器读取模板
+        ClassTemplateLoader templateLoader = new ClassTemplateLoader(DynamicFileGenerator.class, basePackagePath);
+        configuration.setTemplateLoader(templateLoader);
+
+        // 设置模板文件使用的字符集,数字格式
+        configuration.setDefaultEncoding("utf-8");
+        configuration.setNumberFormat("0.######");
+
+        // 指定字符集,解决中文乱码问题
+        Template template = configuration.getTemplate(templateName,"utf-8");
+
+        // 文件不存在则创建文件和父目录
+        if (!FileUtil.exist(outputPath)) {
+            FileUtil.touch(outputPath);
+        }
+
+        // 指定生成的文件路径和名称
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(Paths.get(outputPath)), StandardCharsets.UTF_8));
+
+        // 调用template的process,处理并生成文件
+        template.process(model, out);
+
+        // 关闭输出
+        out.close();
+    }
+
+    /**
+     * 生成文件 (注意无法从jar包加载)
      * @param inputPath  模板文件输入路径
      * @param outputPath  生成文件输出路径
      * @param model  数据模型
      * @throws IOException
      * @throws TemplateException
      */
-    public static void doGenerate(String inputPath, String outputPath, Object model) throws IOException, TemplateException {
+    public static void doGenerateByPath(String inputPath, String outputPath, Object model) throws IOException, TemplateException {
         // 创建Configuration 对象，参数为 FreeMarker 版本号
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_32);
 
         // 指定模板文件所在的路径
         File templateDir = new File(inputPath).getParentFile();
-        System.out.println("templateDir = " + templateDir);
+        // System.out.println("templateDir = " + templateDir);
         configuration.setDirectoryForTemplateLoading(templateDir);
 
         // 设置模板文件使用的字符集,数字格式
@@ -71,5 +104,17 @@ public class DynamicFileGenerator {
 
         // 关闭输出
         out.close();
+    }
+
+    /** 测试动态生成 */
+    public static void main(String[] args) throws IOException, TemplateException {
+        // 指定模板文件所在的路径
+        String projectPath = System.getProperty("user.dir") + File.separator + "code-generator-maker";
+        String inputPath = projectPath + File.separator + "src/main/resources/templates/MainTemplate.java.ftl";
+        String outputPath = projectPath + File.separator + "output/MainTemplate.java";
+        DataModel dataModel = new DataModel();
+//        dataModel.setAuthor("liang");
+//        dataModel.setOutputText("out:");
+        doGenerate(inputPath, outputPath, dataModel);
     }
 }

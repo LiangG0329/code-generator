@@ -1,6 +1,6 @@
 // @ts-ignore
 /* eslint-disable */
-import {request} from '@umijs/max';
+import { request } from '@umijs/max';
 
 /** addGenerator POST /api/generator/add */
 export async function addGeneratorUsingPost(
@@ -58,6 +58,14 @@ export async function downloadGeneratorByIdUsingGet(
     params: {
       ...params,
     },
+    ...(options || {}),
+  });
+}
+
+/** downloadTemplateTool GET /api/generator/download/template */
+export async function downloadTemplateToolUsingGet(options?: { [key: string]: any }) {
+  return request<any>('/api/generator/download/template', {
+    method: 'GET',
     ...(options || {}),
   });
 }
@@ -127,8 +135,7 @@ export async function listGeneratorVoByPageFastUsingPost(
   body: API.GeneratorQueryRequest,
   options?: { [key: string]: any },
 ) {
-  // return request<API.BaseResponsePageGeneratorVO_>('/api/generator/list/page/vo/fast', {
-  return request<API.BaseResponsePageGeneratorVO_>('/api/generator/list/page/vo', {
+  return request<API.BaseResponsePageGeneratorVO_>('/api/generator/list/page/vo/fast', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
