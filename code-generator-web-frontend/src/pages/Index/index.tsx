@@ -13,7 +13,7 @@ import {FALLBACK_IMAGE_URL} from "@/constants";
  */
 const DEFAULT_PAGE_PARAMS: PageRequest = {
     current: 1,
-    pageSize: 12,
+    pageSize: 4,
     sortField: 'updateTime',
     sortOrder: 'descend',
 };

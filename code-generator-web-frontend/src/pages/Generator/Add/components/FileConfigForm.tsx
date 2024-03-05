@@ -1,13 +1,14 @@
-import {CloseOutlined} from '@ant-design/icons';
-import {Alert, Button, Card, Form, FormListFieldData, Input, Select, Space} from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Form, FormListFieldData, Input, Select, Space } from 'antd';
 
 interface Props {
   formRef: any;
   oldData: any;
+  undoData: any;
 }
 
 export default (props: Props) => {
-  const { formRef, oldData } = props;
+  const { formRef, oldData, undoData } = props;
 
   /**
    * 单个表单字段填写视图
@@ -80,7 +81,7 @@ export default (props: Props) => {
             {fields.map((field) => {
               // 注意要获取到 groupKey，防止修改时识别分组错误
               const fileConfig =
-                formRef?.current?.getFieldsValue()?.fileConfig ?? oldData?.fileConfig;
+                formRef?.current?.getFieldsValue()?.fileConfig ?? undoData ?? oldData?.fileConfig;
               const groupKey = fileConfig?.files?.[field.name]?.groupKey;
 
               return (

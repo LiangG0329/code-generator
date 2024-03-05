@@ -1,17 +1,15 @@
-import {CloseOutlined} from '@ant-design/icons';
-import {Button, Card, Form, FormListFieldData, Input, Space} from 'antd';
-import React, {useState} from "react";
+import { CloseOutlined } from '@ant-design/icons';
+import { Button, Card, Form, FormListFieldData, Input, Space } from 'antd';
 
 interface Props {
   formRef: any;
   oldData: any;
+  undoData: any;
 }
 
 export default (props: Props) => {
-  const { formRef, oldData } = props;
-  const [type, setType] = useState('');
+  const { formRef, oldData, undoData } = props;
 
-  // @ts-ignore
   /**
    * 单个表单字段填写视图
    * @param field
@@ -31,17 +29,7 @@ export default (props: Props) => {
       <Form.Item label="类型" name={[field.name, 'type']}>
         <Input />
       </Form.Item>
-      <Form.Item label="默认值" name={[field.name, 'defaultValue']}
-         // rules={[
-         //   {
-         //     transform(value) {
-         //       if (value === 'true') return true;
-         //       if (value === 'false') return false;
-         //       return value;
-         //     },
-         //   },
-         // ]}
-      >
+      <Form.Item label="默认值" name={[field.name, 'defaultValue']}>
         <Input />
       </Form.Item>
       <Form.Item label="缩写" name={[field.name, 'abbr']}>
@@ -62,7 +50,7 @@ export default (props: Props) => {
           {fields.map((field) => {
             // 注意要获取到 groupKey，防止修改时识别分组错误
             const modelConfig =
-              formRef?.current?.getFieldsValue()?.modelConfig ?? oldData?.modelConfig;
+              formRef?.current?.getFieldsValue()?.modelConfig ?? undoData ?? oldData?.modelConfig;
             const groupKey = modelConfig?.models?.[field.name]?.groupKey;
 
             return (
@@ -90,9 +78,6 @@ export default (props: Props) => {
                       <Form.Item label="类型" name={[field.name, 'type']}>
                         <Input />
                       </Form.Item>
-                      <Form.Item label="描述" name={[field.name, 'description']}>
-                        <Input />
-                      </Form.Item>
                       <Form.Item label="条件" name={[field.name, 'condition']}>
                         <Input />
                       </Form.Item>
@@ -104,7 +89,7 @@ export default (props: Props) => {
 
                 {/* 组内字段 */}
                 {groupKey && (
-                  <Form.Item label="组内字段" labelCol={{ style: {fontWeight: 'bold'}}}>
+                  <Form.Item label="组内字段">
                     <Form.List name={[field.name, 'models']}>
                       {(subFields, subOpt) => (
                         <div style={{ display: 'flex', flexDirection: 'column', rowGap: 16 }}>

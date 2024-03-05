@@ -63,6 +63,13 @@ export default [
     name: '我的生成器',
   },
   {
+    path: '/generator/detail/my/:id',
+    icon: 'home',
+    component: './Generator/MyGeneratorDetail',
+    name: '生成器详情',
+    hideInMenu: true,
+  },
+  {
     path: '/admin',
     icon: 'crown',
     name: "管理页",

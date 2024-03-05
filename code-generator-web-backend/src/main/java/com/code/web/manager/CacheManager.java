@@ -2,8 +2,6 @@ package com.code.web.manager;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +18,11 @@ import java.util.concurrent.TimeUnit;
 public class CacheManager {
 
     @Resource(name = "myRedisTemplate")
-//    @Qualifier("myRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate;
 
     // Caffeine 本地缓存
     Cache<String, Object> localCache = Caffeine.newBuilder()
-            .expireAfterWrite(60, TimeUnit.MINUTES)
+            .expireAfterWrite(3, TimeUnit.MINUTES)
             .maximumSize(10_000)
             .build();
 
@@ -38,7 +35,7 @@ public class CacheManager {
         // 写入本地缓存
         localCache.put(key, value);
         // 写入redis分布式缓存
-        redisTemplate.opsForValue().set(key, value, 60, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, value, 10, TimeUnit.MINUTES);
     }
 
     /**

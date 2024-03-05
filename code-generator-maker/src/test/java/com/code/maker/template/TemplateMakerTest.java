@@ -107,11 +107,7 @@ public class TemplateMakerTest {
         String configStr;
         TemplateMakerConfig templateMakerConfig;
 
-//        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker.json");
-//        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
-//        TemplateMaker.makeTemplate(templateMakerConfig);
-
-        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker1.json");
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker.json");
         templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
         TemplateMaker.makeTemplate(templateMakerConfig);
 

@@ -1,13 +1,12 @@
 {
-  "name": "acm-template-pro-generator",
+  "id": 5,
+  "name": "acm-template-pro-generator-5",
   "description": "ACM 示例模板生成器",
   "basePackage": "com.code",
   "version": "1.0",
   "author": "Liang",
   "createTime": "",
   "fileConfig": {
-    "inputRootPath": ".source/acm-template-pro",
-    "outputRootPath": "generated",
     "sourceRootPath": "E:/projects/code-generator/code-generator-demo-projects/acm-template-pro",
     "type": "dir",
     "files": [
@@ -55,7 +54,7 @@
         "defaultValue": true
       },
       {
-        "fieldName": "mainTemplate",
+        "fieldName": "main",
         "type": "Boolean",
         "description": "是否开启配置模板参数",
         "defaultValue": true
@@ -65,7 +64,7 @@
         "groupName": "核心模板参数",
         "type": "MainTemplate",
         "description": "用于生成核心模板文件",
-        "condition": "loop",
+        "condition": "main",
         "models": [
           {
             "fieldName": "author",

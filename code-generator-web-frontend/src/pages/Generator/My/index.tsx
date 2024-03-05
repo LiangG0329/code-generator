@@ -191,7 +191,7 @@ const IndexPage: React.FC = () => {
                 }}
                 renderItem={(data) => (
                     <List.Item>
-                        <Link to={`/generator/detail/${data.id}`}>
+                        <Link to={`/generator/detail/my/${data.id}`}>
                             <Card hoverable
                                   cover={<Image alt={data.name} src={data.picture} fallback={FALLBACK_IMAGE_URL}
                                                 style={{height: 200, objectFit: 'cover'}}/>}

@@ -32,6 +32,14 @@ const GeneratorAddPage: React.FC = () => {
   const [basicInfo, setBasicInfo] = useState<API.GeneratorEditRequest>();
   const [modelConfig, setModelConfig] = useState<API.ModelConfig>();
   const [fileConfig, setFileConfig] = useState<API.FileConfig>();
+  // 记录未确认数据
+  const [undoModelConfig, setUndoModelConfig] = useState<API.ModelConfig>();
+  const [undoFileConfig, setUndoFileConfig] = useState<API.FileConfig>();
+
+  // 未登录返回首页
+  if (!currentUser) {
+    history.push("/user/login");
+  }
 
   /**
    * 加载数据
@@ -48,7 +56,7 @@ const GeneratorAddPage: React.FC = () => {
       // 处理文件路径
       if (res.data) {
         if (!currentUser) {
-          history.push("/");
+          history.push("/user/login");
         }
         if (currentUser) {
           // 用户id 不匹配则返回首页
@@ -176,23 +184,37 @@ const GeneratorAddPage: React.FC = () => {
           <StepsForm.StepForm
             name="modelConfig"
             title="模型配置"
+            onValuesChange={async (values) => {
+              if (formRef?.current?.getFieldsValue()?.modelConfig) {
+                setUndoModelConfig(formRef?.current?.getFieldsValue()?.modelConfig);
+              }
+              return true;
+            }
+            }
             onFinish={async (values) => {
               setModelConfig(values);
               return true;
             }}
           >
-            <ModelConfigForm formRef={formRef} oldData={oldData} />
+            <ModelConfigForm formRef={formRef} oldData={oldData} undoData={undoModelConfig}/>
           </StepsForm.StepForm>
 
           <StepsForm.StepForm
             name="fileConfig"
             title="文件配置"
+            onValuesChange={async (values) => {
+              if (formRef?.current?.getFieldsValue()?.fileConfig) {
+                setUndoFileConfig(formRef?.current?.getFieldsValue()?.fileConfig);
+              }
+              return true;
+            }
+            }
             onFinish={async (values) => {
               setFileConfig(values);
               return true;
             }}
           >
-            <FileConfigForm formRef={formRef} oldData={oldData} />
+            <FileConfigForm formRef={formRef} oldData={oldData} undoData={undoFileConfig}/>
           </StepsForm.StepForm>
 
           <StepsForm.StepForm name="dist" title="生成器文件">

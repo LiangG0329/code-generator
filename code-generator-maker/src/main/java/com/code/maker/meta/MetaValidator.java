@@ -195,17 +195,18 @@ public class MetaValidator {
                     // 默认类型为String
                     model.setType(ModelTypeEnum.STRING.getValue());
                 }
-//                Object defaultValue = model.getDefaultValue();
-//                if (defaultValue != null) {
-//                    if (defaultValue instanceof String) {
-//                        String defaultValueStr = ((String) defaultValue).toLowerCase();
-//                        if ("true".equals(defaultValueStr)) {
-//                            model.setDefaultValue(true);
-//                        } else if ("false".equals(defaultValueStr)) {
-//                            model.setDefaultValue(false);
-//                        }
-//                    }
-//                }
+                // 字符串true false -> Boolean
+                Object defaultValue = model.getDefaultValue();
+                if (defaultValue != null) {
+                    if (defaultValue instanceof String) {
+                        String defaultValueStr = ((String) defaultValue).toLowerCase();
+                        if ("true".equals(defaultValueStr)) {
+                            model.setDefaultValue(true);
+                        } else if ("false".equals(defaultValueStr)) {
+                            model.setDefaultValue(false);
+                        }
+                    }
+                }
             }
 
         }

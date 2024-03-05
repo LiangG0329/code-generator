@@ -1,0 +1,8 @@
+{
+  "needGit": false,
+  "loop": true,
+  "mainTemplate": {
+    "author": "laoYuPi",
+    "outputText": "i said = "
+  }
+}

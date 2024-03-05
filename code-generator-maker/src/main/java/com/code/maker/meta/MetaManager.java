@@ -24,9 +24,10 @@ public class MetaManager {
     }
 
     private static Meta initMeta() {
-//         String metaJson = ResourceUtil.readUtf8Str("meta.json");
-//        String metaJson = ResourceUtil.readUtf8Str("springboot-init-meta.json");
-        String metaJson = ResourceUtil.readUtf8Str("meta4.json");
+        // 设置读取的meta文件
+        // String metaJson = ResourceUtil.readUtf8Str("meta.json");
+        // String metaJson = ResourceUtil.readUtf8Str("springboot-init-meta.json");
+        String metaJson = ResourceUtil.readUtf8Str("acm-template-meta.json");
         Meta metaBean = JSONUtil.toBean(metaJson, Meta.class);
         // 校验和处理默认值
         MetaValidator.doValidAndFill(metaBean);

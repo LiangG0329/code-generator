@@ -1,7 +1,6 @@
 package com.code.maker.generator.main;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.code.maker.generator.GitInit;
@@ -53,7 +52,7 @@ public abstract class GenerateTemplate {
         if (!FileUtil.exist(outputPath)) {
             FileUtil.mkdir(outputPath);
         }
-        System.out.println("meta = " + meta);
+        // System.out.println("meta = " + meta);
         // 1.复制原始文件到生成代码包 (后续使用相对路径生成代码，提高可移植性)
         String sourceCopyPath = copySource(meta, outputPath);
 
