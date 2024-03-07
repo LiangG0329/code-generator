@@ -34,7 +34,7 @@
 
 ####    流程图
 
-![p1](image\p1.png)
+![p1](./image/p1.png)
 
 
 
@@ -55,7 +55,7 @@
 
 ####   流程图
 
-![p2](image\p2.png)
+![p2](./image/p2.png)
 
 
 
@@ -76,44 +76,43 @@
 
 ####   流程图
 
-![p3](image\p3.png)
+![p3](./image/p3.png)
 
 ## 项目展示
 
 主页（代码生成器搜索列表）：
 
-![s1](image\s1.png)
+![s1](./image/s1.png)
 
 代码生成器创建页（分步表单）：
 
-![s2](image\s2.png)
+![s2](./image/s2.png)
 
 代码生成器创建页（复杂嵌套动态表单）：
 
-![s3](image\s3.png)
+![s3](./image/s3.png)
 
 在线上传和制作代码生成器：
 
-![s4](image\s4.png)
+![s4](./image/s4.png)
 
 代码生成器详情页：
 
-![s5](image\s5.png)
+![s5](./image/s5.png)
 
 在线使用代码生成器：
 
-![s6](image\s6.png)
+![s6](./image/s6.png)
 
 生成器和用户管理页：
 
-![s7](image\s7.png)
+![s7](./image/s7.png)
 
 ## 技术选型
 
 ###  前端
 
 - React 开发框架 + Ant Design组件库 + 代码编辑器
-
 
 
 ###  后端
