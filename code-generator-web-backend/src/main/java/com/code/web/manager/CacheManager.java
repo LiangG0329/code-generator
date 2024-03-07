@@ -35,7 +35,7 @@ public class CacheManager {
         // 写入本地缓存
         localCache.put(key, value);
         // 写入redis分布式缓存
-        redisTemplate.opsForValue().set(key, value, 10, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(key, value, 6, TimeUnit.MINUTES);
     }
 
     /**

@@ -24,6 +24,7 @@ public class JsonGenerateCommand implements Callable<Integer> {
         // 读取 json 文件，转换为数据模型
         String jsonStr = FileUtil.readUtf8String(filePath);
         DataModel dataModel = JSONUtil.toBean(jsonStr, DataModel.class);
+        System.out.println("配置信息: " + dataModel);
         FileGenerator.doGenerate(dataModel);
         return 0;
     }

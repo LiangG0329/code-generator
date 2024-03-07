@@ -2,6 +2,7 @@ package com.code.maker.cli;
 
 import com.code.maker.cli.command.ConfigCommand;
 import com.code.maker.cli.command.GenerateCommand;
+import com.code.maker.cli.command.JsonGenerateCommand;
 import com.code.maker.cli.command.ListCommand;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -19,7 +20,8 @@ public class CommandExecutor implements Runnable{
         commandLine = new CommandLine(this)
                 .addSubcommand(new GenerateCommand())
                 .addSubcommand(new ConfigCommand())
-                .addSubcommand(new ListCommand());
+                .addSubcommand(new ListCommand())
+                .addSubcommand(new JsonGenerateCommand());
     }
 
     @Override

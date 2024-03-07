@@ -131,3 +131,4 @@ code-gengrator.iml
 /code-generator-basic/src/main/java/com/code/cli/pattern/
 /code-generator-maker/generated
 code-generator-maker/.temp
+code-generator-web-backend/src/main/resources/application-prod.yml

@@ -13,6 +13,7 @@ import com.code.web.model.dto.generator.GeneratorQueryRequest;
 public class CacheUtils {
     /**
      * 获取分页缓存key
+     *
      * @param generatorQueryRequest 查询请求参数
      * @return key
      */
@@ -23,5 +24,19 @@ public class CacheUtils {
         // 规则  generator:page:请求参数
         String key = "generator:page:" + base64;
         return key;
+    }
+
+    /**
+     * 获取缓存文件路径
+     *
+     * @param id
+     * @param distPath
+     * @return
+     */
+    public static String getCacheFilePath(long id, String distPath) {
+        String projectPath = System.getProperty("user.dir");
+        String tempDirPath = String.format("%s/.temp/cache/%s", projectPath, id);
+        String zipFilePath = tempDirPath + "/" + distPath;
+        return zipFilePath;
     }
 }

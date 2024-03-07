@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import static com.code.web.utils.CacheUtils.getCacheFilePath;
+
 /**
  * 生成器接口
  *
@@ -377,6 +379,7 @@ public class GeneratorController {
 
         } catch (Exception e) {
             log.error("file download error, filepath = " + distPath, e);
+            e.printStackTrace();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "下载失败");
         } finally {
             if (cosObjectInput != null) {
@@ -404,11 +407,12 @@ public class GeneratorController {
 
         // 需要登录
         User loginUser = userService.getLoginUser(request);
+        log.info("userId = {} 在线使用生成器 id={}", loginUser.getId(), id);
+
         Generator generator = generatorService.getById(id);
         if (generator == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "生成器不存在");
         }
-        log.info("userId = {} 在线使用生成器 id={}", loginUser.getId(), generator.getId());
 
         // 生成器存储路径
         String distPath = generator.getDistPath();
@@ -424,15 +428,35 @@ public class GeneratorController {
         String zipFilePath = tempDirPath + "/dist.zip";
 
         // 目录不存在则创建
-        if (!FileUtil.exist(zipFilePath)) {
+        if (!FileUtil.exist(tempDirPath)) {
             FileUtil.mkdir(tempDirPath);
         }
 
-        // 下载文件
-        try {
-            cosManager.download(distPath, zipFilePath);
-        } catch (InterruptedException e) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成器下载失败");
+        // 使用文件缓存，优先查找服务器本地缓存
+        String cacheFilePath = CacheUtils.getCacheFilePath(id, distPath);
+        Path cacheFilePathObj = Paths.get(cacheFilePath);
+        Path zipFilePathObj = Paths.get(zipFilePath);
+
+        if (!FileUtil.exist(zipFilePath)) {
+            // 有缓存，复制文件
+            if (FileUtil.exist(cacheFilePath)) {
+                Files.copy(cacheFilePathObj, zipFilePathObj);
+            } else {
+                // 没有缓存，从对象存储下载文件
+                FileUtil.touch(zipFilePath);
+                try {
+                    cosManager.download(distPath, zipFilePath);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成器下载失败");
+                }
+                // 写文件缓存
+                File parentFile = cacheFilePathObj.toFile().getParentFile();
+                if (!FileUtil.exist(parentFile)) {
+                    FileUtil.mkdir(parentFile);
+                }
+                Files.copy(zipFilePathObj, cacheFilePathObj);
+            }
         }
 
         // 解压压缩包，得到生成器产物包文件夹
@@ -462,13 +486,17 @@ public class GeneratorController {
                     .orElseThrow(RuntimeException::new);
         }
 
-        // 添加可执行权限
-        try {
-            Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxrwxrwx");
-            Files.setPosixFilePermissions(scriptFile.toPath(), permissions);
-        } catch (Exception e) {
 
+        // 添加可执行权限
+        if (!osName.startsWith("Windows")) {
+            try {
+                Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxrwxrwx");
+                Files.setPosixFilePermissions(scriptFile.toPath(), permissions);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+
 
         // 构造命令
         // 脚本文件所在文件夹
@@ -486,17 +514,34 @@ public class GeneratorController {
         // 执行命令
         try {
             Process process = processBuilder.start();
-            // 读取命令输出
-            InputStream inputStream = process.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
+
+            // 创建一个新线程来读取标准输出
+            new Thread(() -> {
+                try (BufferedReader stderr = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = stderr.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
+            // 创建一个新线程来读取错误输出
+            new Thread(() -> {
+                try (BufferedReader stdout = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                    String line;
+                    while ((line = stdout.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
 
             // 等待命令输出完成
             int exitCode = process.waitFor();
-            System.out.println("命令执行结束，退出码：" + exitCode);
+            System.out.println("运行脚本命令执行结束，退出码：" + exitCode);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "执行生成器脚本错误");
@@ -557,6 +602,7 @@ public class GeneratorController {
         try {
             cosManager.download(zipFilePath, localZipFilePath);
         } catch (InterruptedException e) {
+            e.printStackTrace();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "模版文件压缩包下载失败");
         }
 
@@ -597,29 +643,75 @@ public class GeneratorController {
         });
     }
 
+    /**
+     * 缓存代码生成器
+     *
+     * @param generatorCacheRequest
+     * @return
+     */
+    @PostMapping("/cache")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public void cacheGenerator(@RequestBody GeneratorCacheRequest generatorCacheRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (generatorCacheRequest == null || generatorCacheRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
 
+        long id = generatorCacheRequest.getId();
+        Generator generator = generatorService.getById(id);
+        if (generator == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+
+        String distPath = generator.getDistPath();
+        if (StrUtil.isBlank(distPath)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "产物包不存在");
+        }
+
+        String zipFilePath = getCacheFilePath(id, distPath);
+
+        try {
+            cosManager.download(distPath, zipFilePath);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "生成器下载失败");
+        }
+    }
+
+    /**
+     * 下载模板制作工具
+     *
+     * @param request
+     * @param response
+     * @throws IOException
+     */
     @GetMapping("/download/template")
     public void downloadTemplateTool(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         User loginUser = userService.getLoginUser(request);
-        log.info("userId = {} 下载了模版制作工具", loginUser.getId());;
+        log.info("userId = {} 下载了模板制作工具", loginUser.getId());;
 
+        String toolKey = "/template_tool/templateTool.zip";
+
+        COSObjectInputStream cosObjectInput = null;
         try {
-            String projectPath = System.getProperty("user.dir");
-            String zipDir = projectPath + "/src/main/java/com/code/web/zip";
-            System.out.println("dir = " + zipDir);
-            Path file = Paths.get(zipDir, "templateTool.zip");   // 文件路径和文件名
-            if (Files.exists(file)) {
-                response.setContentType("application/zip;charset=UTF-8");
-                response.addHeader("Content-Disposition", "attachment; filename=" + file.getFileName());
-                Files.copy(file, response.getOutputStream());
-                response.getOutputStream().flush();
-            } else {
-                throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "模版制作工具不存在");
-            }
+            COSObject cosObject = cosManager.getObject(toolKey);
+            cosObjectInput = cosObject.getObjectContent();
+            // 处理下载到的流
+            byte[] bytes = IOUtils.toByteArray(cosObjectInput);
+            // 设置响应头
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=" + toolKey);
+            // 写入响应
+            response.getOutputStream().write(bytes);
+            response.getOutputStream().flush();
+
         } catch (Exception e) {
-            log.error("template tool download error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "下载失败");
+            log.error("tool download error ", e);
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "模板工具下载失败");
+        } finally {
+            if (cosObjectInput != null) {
+                cosObjectInput.close();
+            }
         }
     }
 }

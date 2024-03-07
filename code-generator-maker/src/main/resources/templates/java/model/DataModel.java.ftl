@@ -30,9 +30,11 @@ public class DataModel {
      */
     private ${modelInfo.type} ${modelInfo.groupKey} = new ${modelInfo.type}();
 
+    <#if modelInfo.description??>
     /**
      * ${modelInfo.description}
      */
+     </#if>
     @Data
     public static class ${modelInfo.type} {
         <#-- 遍历分组内的model -->

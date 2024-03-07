@@ -78,6 +78,9 @@ export default (props: Props) => {
                       <Form.Item label="类型" name={[field.name, 'type']}>
                         <Input />
                       </Form.Item>
+                      <Form.Item label="描述" name={[field.name, 'description']}>
+                        <Input />
+                      </Form.Item>
                       <Form.Item label="条件" name={[field.name, 'condition']}>
                         <Input />
                       </Form.Item>

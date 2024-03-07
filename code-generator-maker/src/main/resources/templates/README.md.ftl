@@ -33,9 +33,9 @@ ${modelInfo?index + 1}) ${modelInfo.fieldName}
 
 类型：${modelInfo.type}
 
-描述：${modelInfo.description}
+<#if modelInfo.description??>描述：${modelInfo.description}</#if>
 
-默认值：${modelInfo.defaultValue?c}
+<#if modelInfo.defaultValue??>默认值：${modelInfo.defaultValue?c}</#if>
 
 <#if modelInfo.abbr??>子命令缩写： -${modelInfo.abbr}</#if>
 </#if>
@@ -44,7 +44,7 @@ ${modelInfo?index + 1}) ${modelInfo.fieldName}
 
 类型：${modelInfo.type}
 
-描述：${modelInfo.description}
+<#if modelInfo.description??>描述：${modelInfo.description}</#if>
 
 分组命令选项：<#list modelInfo.models as groupModel><#if groupModel.fieldName??> --${groupModel.fieldName}<#if groupModel.abbr??>|-${groupModel.abbr}</#if></#if></#list>
 

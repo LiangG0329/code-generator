@@ -46,8 +46,9 @@ public abstract class GenerateTemplate {
      * @throws TemplateException
      * @throws IOException
      * @throws InterruptedException
+     * @throws RuntimeException
      */
-    public void doGenerate(Meta meta, String outputPath) throws TemplateException, IOException, InterruptedException {
+    public void doGenerate(Meta meta, String outputPath) throws TemplateException, IOException, InterruptedException, RuntimeException {
 
         if (!FileUtil.exist(outputPath)) {
             FileUtil.mkdir(outputPath);
@@ -63,10 +64,10 @@ public abstract class GenerateTemplate {
         String jarPath = buildJar(meta, outputPath);
 
         // 4.封装脚本
-        String Output = buildScript(jarPath, outputPath);
+        String shellOutputFilePath = buildScript(jarPath, outputPath);
 
         // 5.生成精简版代码生成器(产物包)
-        buildDist(outputPath, sourceCopyPath, jarPath, Output);
+        buildDist(outputPath, sourceCopyPath, jarPath, shellOutputFilePath);
 
         // 6.git init代码托管, 根据需要可开启支持使用 Git 版本控制工具来托管
         //gitInit(projectPath, outputPath);
@@ -177,7 +178,7 @@ public abstract class GenerateTemplate {
      * @throws IOException
      * @throws InterruptedException
      */
-    protected String buildJar(Meta meta, String outputPath) throws IOException, InterruptedException {
+    protected String buildJar(Meta meta, String outputPath) throws RuntimeException {
         JarGenerator.doGenerate(outputPath);
         String jarName = String.format("%s-%s-jar-with-dependencies.jar", meta.getName(), meta.getVersion());
         String jarPath = "target/" + jarName;
@@ -191,7 +192,7 @@ public abstract class GenerateTemplate {
      * @param outputPath 输出输出路径
      * @return 生成的可执行脚本的路径
      */
-    protected String buildScript(String jarPath,String outputPath) {
+    protected String buildScript(String jarPath, String outputPath) {
         String shellOutputPath = outputPath + File.separator + "generator";
         ScriptGenerator.doGenerate(shellOutputPath, jarPath);
         return shellOutputPath;

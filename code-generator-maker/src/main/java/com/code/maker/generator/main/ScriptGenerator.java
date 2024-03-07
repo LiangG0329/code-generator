@@ -31,7 +31,7 @@ public class ScriptGenerator {
             Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxrwxrwx");
             Files.setPosixFilePermissions(Paths.get(outputPath), permissions);
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
         }
 
         // window系统
