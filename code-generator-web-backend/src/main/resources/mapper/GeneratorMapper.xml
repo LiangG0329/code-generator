@@ -29,7 +29,7 @@
         ,name,description,
         basePackage,version,author,
         tags,picture,fileConfig,
-        modelConfig,distPath,status,
+        modelConfig,distPath,downloadCount,status,
         userId,createTime,updateTime,
         isDelete
     </sql>
